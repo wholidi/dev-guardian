@@ -1,0 +1,26 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+.env
+
+# Bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/

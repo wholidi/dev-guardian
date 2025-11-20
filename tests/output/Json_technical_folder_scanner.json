@@ -1,0 +1,142 @@
+{
+  "summary": "Overall Risk Level: Critical\n\nKey Issues to Fix First:\n1. Command Injection Vulnerabilities – Multiple endpoints pass unsanitized user input directly into system command execution functions (e.g., os.popen). This can allow attackers to execute arbitrary commands. Replace these calls with safer methods (e.g., subprocess.run with argument lists) and implement strict input validation.\n2. SQL Injection Vulnerabilities – Several functions build SQL queries using direct string concatenation of user inputs. These issues are prevalent in multiple modules. Transition to parameterized queries or prepared statements to properly escape user inputs.\n3. Hard-Coded Secrets – Numerous instances of sensitive data (API secrets, database credentials, JWT secrets,",
+  "findings": [
+    {
+      "title": "Debug Mode Enabled in Production",
+      "severity": "medium",
+      "location": "app.config['DEBUG'] = True",
+      "description": "Running the application with debug mode enabled can expose detailed error information and potentially sensitive configuration details to attackers. This setting should never be enabled in a production environment.",
+      "recommendation": "Disable debug mode in production by setting app.config['DEBUG'] = False and use a more secure error handling strategy.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\app.py"
+    },
+    {
+      "title": "Hard-coded API Secret",
+      "severity": "high",
+      "location": "API_SECRET = \"super-secret-api-key-123\"",
+      "description": "Storing sensitive secrets directly in source code can lead to unintended exposure if the code is leaked or accessed by unauthorized individuals.",
+      "recommendation": "Use environment variables or secure vaults to store sensitive configuration values. Avoid hard-coding secrets in the source code.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\app.py"
+    },
+    {
+      "title": "Command Injection Vulnerability",
+      "severity": "critical",
+      "location": "def run() - os.popen(cmd).read()",
+      "description": "The 'cmd' parameter is taken directly from the user's request and passed to os.popen without proper validation or sanitization, which could allow an attacker to execute arbitrary system commands.",
+      "recommendation": "Avoid using os.popen with untrusted input. Use safe execution libraries or restrict allowed commands by whitelisting acceptable commands. Validate and sanitize all user inputs before executing system commands.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\app.py"
+    },
+    {
+      "title": "SQL Injection Vulnerability",
+      "severity": "critical",
+      "location": "def user() - get_user_raw_query(user_id)",
+      "description": "The user_id parameter from the request is passed directly to the get_user_raw_query function without sanitization. If this function concatenates the parameter into a SQL query, it could be exploited to perform a SQL Injection attack.",
+      "recommendation": "Ensure the function uses parameterized queries or prepared statements. Validate and sanitize all inputs used in SQL queries to avoid injection vulnerabilities.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\app.py"
+    },
+    {
+      "title": "Insecure Token Verification",
+      "severity": "medium",
+      "location": "def login() - verify_token_insecure(token)",
+      "description": "The token verification mechanism uses an insecure function (verify_token_insecure) which may not properly validate the authenticity of tokens. This can lead to unauthorized access if tokens are spoofed or otherwise compromised.",
+      "recommendation": "Implement a secure token validation mechanism, such as JWT validation with proper cryptographic verification, and ensure that all token-based authentication checks are robust against attacks.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\app.py"
+    },
+    {
+      "title": "Sensitive Configuration Exposure",
+      "severity": "high",
+      "location": "def get_config()",
+      "description": "The /config endpoint reads and returns the contents of the 'config/settings.json' file. This file can include sensitive configuration information that should not be exposed to clients.",
+      "recommendation": "Restrict access to sensitive configuration files. Remove or secure the endpoint that exposes configuration data, and ensure that sensitive information is not unnecessarily exposed in the API.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\app.py"
+    },
+    {
+      "title": "Hardcoded Secrets in Token Verification",
+      "severity": "critical",
+      "location": "HARDCODED_TOKENS and verify_token_insecure function",
+      "description": "The use of hardcoded tokens in the source code exposes secret credentials, making it easy for an attacker to bypass authentication if these credentials become public or can be guessed. Hardcoded secrets are vulnerable to extraction from the codebase, reverse engineering, or accidental exposure.",
+      "recommendation": "Remove hardcoded tokens from the codebase. Store secrets securely using environment variables, secure configuration management, or a secret management tool. Additionally, ensure that token storage complies with secure development practices.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\auth.py"
+    },
+    {
+      "title": "Insecure Token Verification Logic",
+      "severity": "high",
+      "location": "verify_token_insecure function",
+      "description": "The token verification logic accepts any token that starts with 'test-' in addition to tokens in the hardcoded list. This logic greatly increases the attack surface, allowing unintended tokens that simply begin with 'test-' to be authenticated, potentially bypassing proper access controls.",
+      "recommendation": "Revise the token verification algorithm to enforce stricter validation rules and avoid wildcard checks on token content. Ensure that only tokens generated and stored securely are considered valid, and remove or restrict the permissive 'test-' prefix check to minimize the risk of unauthorized access.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\auth.py"
+    },
+    {
+      "title": "Hardcoded Database Credentials",
+      "severity": "high",
+      "location": "Line 1-3",
+      "description": "The configuration file contains hardcoded database credentials (DB_HOST, DB_USER, DB_PASSWORD). Hardcoded credentials are easily discoverable, potentially exposing the database to unauthorized access.",
+      "recommendation": "Remove hardcoded credentials from configuration files. Use environment variables or secure secrets management solutions to manage sensitive data.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\config.py"
+    },
+    {
+      "title": "Hardcoded JWT Secret",
+      "severity": "high",
+      "location": "Line 4",
+      "description": "The config file contains a hardcoded JWT secret (JWT_SECRET) which can be exploited to forge authentication tokens if discovered.",
+      "recommendation": "Store the JWT secret securely, such as in environment variables or a dedicated secrets manager, and avoid hardcoding it directly in the code or configuration files.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\config.py"
+    },
+    {
+      "title": "SQL Injection Vulnerability",
+      "severity": "high",
+      "location": "get_user function, line where query is constructed",
+      "description": "The code concatenates an untrusted parameter 'uid' directly into the SQL query string without sanitization or use of parameterized queries. This exposes the application to SQL injection attacks.",
+      "recommendation": "Use parameterized queries or prepared statements to safely insert user input into the query. For example, use 'conn.execute(\"SELECT * FROM users WHERE id = ?\", (uid,))' to mitigate SQL injection risks.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\database.py"
+    },
+    {
+      "title": "SQL Injection via Unsanitized Input",
+      "severity": "high",
+      "location": "get_user_raw_query function, query construction line",
+      "description": "The SQL query is constructed by directly concatenating the untrusted 'user_id' variable into the query string. This makes the code highly susceptible to SQL injection attacks, where an attacker could manipulate the input to execute arbitrary SQL commands.",
+      "recommendation": "Use parameterized queries to safely bind the user input. For example, change the query to \"SELECT id, username, email FROM users WHERE id = ?\" and execute it using 'cur.execute(query, (user_id,))'. This will properly escape the input and prevent SQL injection.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\db.py"
+    },
+    {
+      "title": "Hardcoded Secret",
+      "severity": "medium",
+      "location": "API_KEY variable at the top of the file",
+      "description": "The API key is hardcoded directly in the source code, making it vulnerable if the code is exposed or pushed to a public repository.",
+      "recommendation": "Store sensitive credentials in environment variables or secure credential storage services rather than hardcoding them directly into the source code.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\insecure.py"
+    },
+    {
+      "title": "Command Injection Vulnerability",
+      "severity": "critical",
+      "location": "run() function in the /run route",
+      "description": "User-controlled input from the 'cmd' parameter is passed directly to os.popen without any validation or sanitization, allowing an attacker to execute arbitrary system commands.",
+      "recommendation": "Avoid using unsanitized input in system command execution. Use a safer alternative like subprocess.run() with a list of arguments and proper validation, or implement strict input validation and sanitization mechanisms.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\insecure.py"
+    },
+    {
+      "title": "SQL Injection Vulnerability",
+      "severity": "critical",
+      "location": "user() function in the /user route",
+      "description": "User input from the 'id' parameter is embedded directly into an SQL query string using f-string formatting without any sanitization. This makes the endpoint vulnerable to SQL injections.",
+      "recommendation": "Never build SQL queries by directly concatenating or interpolating user input. Instead, use parameterized queries or an ORM that safely escapes inputs to prevent SQL injection.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\insecure.py"
+    },
+    {
+      "title": "Reflected XSS via Direct DOM Manipulation",
+      "severity": "high",
+      "location": "document.getElementById('welcome').innerHTML assignment",
+      "description": "The code retrieves a query parameter 'name' from window.location.search without sanitizing it and directly assigns it to innerHTML. This creates a reflected XSS vulnerability because an attacker can craft a URL with malicious script code in the 'name' parameter.",
+      "recommendation": "Avoid directly inserting untrusted data into innerHTML. Instead, use safer methods like textContent or properly escape the input to eliminate the possibility of injected scripts. Alternatively, consider using libraries or frameworks that provide built-in XSS protections.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\static\\app.js"
+    },
+    {
+      "title": "Logging Sensitive Credentials",
+      "severity": "high",
+      "location": "log_login_attempt function",
+      "description": "The function logs the raw password along with the username during a login attempt. This can lead to exposure of sensitive credentials in log files, which may be accessed by unauthorized individuals.",
+      "recommendation": "Avoid logging sensitive information such as passwords. Instead, log only non-sensitive data such as a user identifier or a simple login attempt message without including the actual password.",
+      "source_file": "C:\\Users\\930140\\AppData\\Local\\Temp\\1\\tmp4br89zny\\src\\test_project\\utils\\logger.py"
+    }
+  ],
+  "lc_summary": ""
+}

@@ -1,0 +1,353 @@
+# GenAI Security Agent (Multi-Agent Code Security Scanner)
+
+This project is a **GenAI-powered security review service** for source code and small projects.  
+It exposes a FastAPI backend with a simple web UI for:
+
+- Scanning a **single file** or a **full project ZIP**
+- Running a **multi-agent workflow** (Scan → Risk Classification → Executive Summary)
+- Providing both **developer-focused** and **executive-friendly** security reports
+- Downloading results as **HTML, PDF (via browser print), and JSON**
+
+---
+
+## 1. High-Level Architecture
+
+### Multi-Agent Workflow
+
+The core logic lives in `multi_agent_workflow.py` and is organized as three cooperating agents plus a supervisor: :contentReference[oaicite:0]{index=0}  
+
+1. **ScanAgent**
+   - Role: *LLM-powered codebase security scanner*
+   - Uses `analyze_path(project_path)` to generate raw security findings for the project.
+
+2. **RiskClassifierAgent**
+   - Role: *Security triage specialist (severity & OWASP mapping)*
+   - Normalizes severity to `low | medium | high | critical`
+   - Optionally enriches each finding with an `owasp_category`
+   - Uses **Guardrails** (`guard_findings`) to enforce schema and repair LLM output.
+
+3. **SummaryAgent**
+   - Role: *Security architect producing executive summary*
+   - Produces a concise, human-readable summary:
+     - Overall risk level for the project
+     - 3–5 issues to fix first
+     - Quick wins / hardening recommendations
+
+4. **SupervisorAgent**
+   - Role: *Orchestration router*
+   - Receives a `user_request` string and selects **exactly one module**:
+     - `security_scan` (implemented)
+     - `rag_assistant` (future)
+     - `sql_explorer` (future)
+     - `python_toolkit` (future)
+   - Invokes the selected workflow from `WORKFLOWS` and returns both:
+     - `supervisor_decision`
+     - `result` (summary, findings, workflow trace)
+
+> Entry points:
+> - `run_multi_agent_workflow(project_path)` → direct security scan
+> - `run_workflow_with_supervisor(project_path, user_request)` → supervisor + workflow
+
+---
+
+## 2. FastAPI Service & Web UI
+
+The FastAPI application is defined in `api_server.py`. :contentReference[oaicite:1]{index=1}  
+
+- **App title:** `GenAI Security Agent`
+- **Description:** *Seagate GenAI-powered security review service*
+- Provides both **JSON endpoints** and a **browser UI** at `/ui`.
+- HTML reports include:
+  - Overall risk badge and statistics
+  - Severity distribution bar chart (via Chart.js)
+  - Detailed findings table
+  - Buttons for **Download as PDF** (browser print) and **Download JSON**
+
+### HTML Report Features
+
+The helper `build_html_report_with_lc(...)` and `render_html_report(...)`:
+
+- Compute severity bucket counts and overall risk level.
+- Render a styled HTML report with:
+  - Executive summary
+  - Optional **LangChain** executive narrative (for “Executive” mode)
+  - Severity chart
+  - Findings table
+- Inject a JSON object into the page (`{{REPORT_JSON}}`) and provide a
+  **“Download JSON”** button that saves `security_report.json`.
+
+---
+
+## 3. API Endpoints
+
+### Health Check
+
+- `GET /health`  
+  Returns `{"status": "ok"}`.  
+  Use this for basic service monitoring.
+
+---
+
+### Single-File Scanners
+
+#### 3.1 `/analyze-file` – Basic single-file JSON scan
+
+- **Method:** `POST`
+- **Request:** multipart form with one file field:
+  - `file`: source file (`.py`, `.js`, `.cs`, etc.)
+- **Behavior:**
+  - Saves the uploaded file to a temp path
+  - Calls `ai_agent.analyze_file(tmp_path)`
+  - Returns findings as raw JSON array.
+- **Response:** JSON list of findings.
+
+---
+
+#### 3.2 `/multi-agent-file` – Multi-agent single-file HTML report
+
+- **Method:** `POST`
+- **Request:** multipart form with:
+  - `file`: single source file.
+- **Behavior:**
+  - Wraps the file in a temporary folder
+  - Calls `run_multi_agent_workflow(tmp_dir_path)` (Scan → Risk → Summary)
+  - Renders a **full HTML report** (same style as folder scan).
+- **Response:** `text/html` (browser-rendered report).
+
+---
+
+#### 3.3 `/multi-agent-file-json` – Multi-agent single-file JSON (debug)
+
+- **Method:** `POST`
+- **Request:** multipart form with:
+  - `file`: single source file.
+- **Behavior:**
+  - Same workflow as `/multi-agent-file`
+  - Returns the raw `{"summary", "findings", "workflow_trace"}` JSON.
+- **Response:** JSON.
+
+---
+
+### Project / ZIP Scanners
+
+All ZIP endpoints expect a **project archive** (e.g., containing `src/` or `app/`).
+
+#### 3.4 `/analyze-zip-html` – Legacy simple HTML report
+
+- **Method:** `POST`
+- **Request:** multipart form:
+  - `zip_file`: ZIP codebase.
+- **Behavior:**
+  - Extracts ZIP into a temp `src` folder.
+  - Calls `run_workflow_with_supervisor(...)` with a fixed full-scan request.
+  - Collects findings from `result.findings`.
+  - Renders a simpler HTML report using `findings_to_html(...)`.
+- **Response:** HTML report (legacy format).
+
+---
+
+#### 3.5 `/scan` – Unified Folder Scanner (Technical vs Executive)
+
+- **Method:** `POST`
+- **Request (multipart):**
+  - `mode`: `"technical"` (default) or `"executive"`
+  - `user_request`: free text instruction (default: “Please perform a full security scan…”)
+  - `zip_file`: project ZIP
+- **Behavior:**
+
+  - Extracts ZIP into a temp `src` folder.
+  - If `mode == "executive"`:
+    - Runs `run_langchain_supervisor(extract_path, user_request)` to get `final_report_text`
+      (executive narrative powered by LangChain).
+    - Runs `run_workflow_with_supervisor(...)` to get structured findings.
+    - Returns combined HTML report (table + exec narrative).
+  - Otherwise (`technical`):
+    - Runs `run_workflow_with_supervisor(...)` directly
+    - Returns HTML report with developer-level detail.
+
+- **Response:** HTML report with JSON download button.
+
+---
+
+#### 3.6 `/supervisor-zip` – Classic SupervisorAgent ZIP scan
+
+- **Method:** `POST`
+- **Request (multipart):**
+  - `user_request`: high-level instruction
+  - `zip_file`: project ZIP
+- **Behavior:**
+  - Extracts ZIP
+  - Calls `run_workflow_with_supervisor(extract_path, user_request)`
+  - Returns combined HTML report.
+
+---
+
+#### 3.7 `/lc-supervisor-zip` – LangChain Supervisor ZIP scan
+
+- **Method:** `POST`
+- **Request (multipart):**
+  - `user_request`: high-level instruction (required)
+  - `zip_file`: project ZIP
+- **Behavior:**
+  - Extracts ZIP
+  - Calls `run_langchain_supervisor(extract_path, user_request)` to generate
+    an **executive summary** (`final_report_text`).
+  - Runs `run_workflow_with_supervisor(...)` to get structured technical findings.
+  - Returns a combined HTML report (technical table + business narrative).
+
+---
+
+### Web UI
+
+#### 3.8 `/ui` – Browser-based upload interface
+
+- **Method:** `GET`
+- **Behavior:** Returns a simple HTML UI with two sections:
+
+1. **File Scanner**
+   - Upload a single `.py/.js/.ts/.cs/.java/.go/.rb/.php/.c/.cpp` file.
+   - Submits to `/multi-agent-file`.
+   - Best for quick checks on single files.
+
+2. **Folder Scanner**
+   - Provide a high-level “Instruction” (text input).
+   - Choose:
+     - **Technical Scan (with Guardrails)** – detailed engineer-level report
+     - **Executive Report (Powered by LangChain)** – business narrative
+   - Upload a ZIP file and submit to `/scan`.
+
+---
+
+## 4. Running the Service Locally
+
+### 4.1 Prerequisites
+
+- Python 3.10+ (recommended)
+- `pip` available
+- Access to your chosen LLM provider (API key in `.env` file), e.g.:
+  - `OPENAI_API_KEY=...` or similar, depending on `ai_agent.py` and `guardrails_utils.py` configuration.
+
+### 4.2 Setup
+
+```bash
+# 1) Clone or copy this repository
+cd Sea_GenAI_Sec_Spv_Agent_LC   # adjust folder name if different
+
+# 2) (Recommended) create and activate a virtual environment
+python -m venv .venv
+# Windows PowerShell:
+. .venv/Scripts/Activate.ps1
+# or cmd:
+# .venv\Scripts\activate.bat
+
+# 3) Install dependencies
+pip install -r requirements.txt   # (prepare this file if not already present)
+
+# 4) Configure environment
+# Create a .env file with your model/API settings, e.g.:
+# OPENAI_API_KEY=xxxx
+
+4.3 Start FastAPI with Uvicorn
+
+From the project root:
+
+uvicorn api_server:app --host 0.0.0.0 --port 8003 --reload
+
+
+Then open in your browser:
+
+UI: http://localhost:8003/ui
+
+Health: http://localhost:8003/health
+
+5. Typical Usage Flows
+5.1 Developer quick scan (single file)
+
+Go to http://localhost:8003/ui.
+
+Under File Scanner, upload a single .py / .js / .cs file.
+
+Click Run File Scan.
+
+Review the HTML report, and optionally:
+
+Print to PDF (browser print)
+
+Click Download JSON to export the raw findings.
+
+5.2 Project-level technical scan
+
+Zip your project (e.g., src/ or app/ folder).
+
+Go to http://localhost:8003/ui.
+
+Under Folder Scanner:
+
+Leave mode as Technical Scan (with Guardrails).
+
+Keep or adjust the instruction text.
+
+Upload the ZIP file.
+
+Submit and review the technical HTML report.
+
+5.3 Executive-friendly report
+
+Zip your project.
+
+Under Folder Scanner, choose:
+
+Executive Report (Powered by LangChain).
+
+Provide a business-focused instruction (e.g.
+"Explain key risks in plain language for non-technical stakeholders").
+
+Upload ZIP and run the scan.
+
+The HTML report will include:
+
+Executive summary (LangChain)
+
+Detailed technical findings table.
+
+6. Project Structure (example)
+
+Based on the shared folder view, the project could be organized as:
+
+Sea_GenAI_Sec_Spv_Agent_LC/
+  ├─ api_server.py              # FastAPI service and HTML reporting
+  ├─ multi_agent_workflow.py    # Multi-agent orchestration & supervisor
+  ├─ ai_agent.py                # Core code analysis helpers (single/path)
+  ├─ guardrails_utils.py        # Guardrails schema & parsing utilities
+  ├─ langchain_supervisor_workflow.py  # (not shown) LC supervisor logic
+  ├─ report_html.py             # Legacy/simple HTML report builder
+  ├─ Docs/                      # Documentation / examples
+  ├─ Src/ or src/               # Sample source code
+  ├─ UI/                        # Front-end or prototype UI files
+  ├─ test_project/, test data/  # Sample projects and test assets
+  ├─ .env                       # Local environment configuration
+  └─ ... other scripts (start/stop, etc.)
+
+
+Adjust this section to match your actual layout as needed.
+
+7. Extensibility & Future Work
+
+Implement additional workflows in WORKFLOWS:
+
+rag_assistant – RAG over project docs.
+
+sql_explorer – security analytics on logs/metrics via SQL.
+
+python_toolkit – small automated remediation helpers.
+
+Add more output formats (e.g. CSV, Excel) from the existing JSON.
+
+Integrate with internal CI/CD pipeline for automatic pull-request scanning.
+
+Wire into external tools (e.g., Moonshot red-teaming, AI Verify) as upstream or downstream components.
+
+8. License & Internal Use
+
+⚠️ This repository is intended for internal experimentation and demos.
+Add appropriate license, confidentiality, and usage notes here according to your organization’s policies.
