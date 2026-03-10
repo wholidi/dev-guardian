@@ -1,16 +1,17 @@
-# Python virtual environment
+# Python virtual environments
 .venv/
 venv/
 env/
-.env
-
-# Bytecode
-__pycache__/
-*.pyc
-*.pyo
 
 # Environment variables
 .env
+.env.*
+
+# Python cache / bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # Logs
 *.log
@@ -19,8 +20,10 @@ __pycache__/
 *.tmp
 *.temp
 
-# VSCode
+# IDE settings
 .vscode/
-
-# PyCharm
 .idea/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -11,7 +11,7 @@ from langchain.tools import tool
 from langchain.agents import create_agent
 
 # Your existing multi-agent workflow (already working)
-from multi_agent_workflow import run_workflow_with_supervisor
+from .multi_agent_workflow import run_workflow_with_supervisor
 
 # Load variables from .env (OPENAI_API_KEY, OPENAI_BASE_URL, etc.)
 load_dotenv()

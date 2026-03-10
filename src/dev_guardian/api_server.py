@@ -12,13 +12,13 @@ from typing import List, Dict, Any
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse, HTMLResponse
 
-from multi_agent_workflow import (
+from .multi_agent_workflow import (
     run_multi_agent_workflow,
     run_workflow_with_supervisor,
 )
-from langchain_supervisor_workflow import run_langchain_supervisor
-from ai_agent import analyze_file
-from report_html import findings_to_html
+from .langchain_supervisor_workflow import run_langchain_supervisor
+from .ai_agent import analyze_file
+from .report_html import findings_to_html
 
 # -------------------------------------------------
 # FastAPI app

@@ -5,8 +5,8 @@ from typing import List, Dict, Any, Callable
 import json
 import time
 
-from ai_agent import analyze_path, client, MODEL_NAME
-from guardrails_utils import guard_findings 
+from .ai_agent import analyze_path, client, MODEL_NAME
+from .guardrails_utils import guard_findings 
 
 # ---------- Agent 1: ScanAgent ----------
 

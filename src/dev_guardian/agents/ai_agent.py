@@ -8,7 +8,7 @@ from openai import OpenAI
 import httpx  # <-- add this import
 import os
 
-from report_html import save_html_report  # <-- use your HTML helper
+from .report_html import save_html_report  # <-- use your HTML helper
 
 # ----------------------------------------------------------
 # Load env + Seagate endpoint
