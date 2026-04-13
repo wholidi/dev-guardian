@@ -1,7 +1,7 @@
 # Dev Guardian 
 It is a GenAI-powered Security Agent — an intelligent, automated code-review system designed to help teams quickly identify security weaknesses in source code or small projects. It combines multi-agent analysis, Guardrails validation, and LangChain-based executive reporting to deliver both deep technical findings and high-level security insights.
 
-Built for the Seagate GenAI Hackathon, Dev Guardian uses LLMs to analyze files, classify risks, map issues to OWASP categories, and generate clear, actionable reports for engineers, auditors, and business leaders.
+Built for the GenAI Hackathon, Dev Guardian uses LLMs to analyze files, classify risks, map issues to OWASP categories, and generate clear, actionable reports for engineers, auditors, and business leaders.
 
 Dev Guardian is a multi-agent AI-powered security analysis platform built for the Seagate GenAI Hackathon.  
 It performs automated security scanning of source code using a hybrid workflow:
