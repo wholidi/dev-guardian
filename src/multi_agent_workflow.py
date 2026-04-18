@@ -6,7 +6,10 @@ import json
 import time
 
 from .ai_agent import analyze_path, get_client, MODEL_NAME
-from .guardrails_utils import guard_findings
+
+# Guardrails is optional — app works without it
+try:
+    from .guardrails_utils import guard_findings
     GUARDRAILS_AVAILABLE = True
 except ImportError:
     guard_findings = None
@@ -58,16 +61,16 @@ def risk_classifier_agent(findings: List[Dict[str, Any]]) -> List[Dict[str, Any]
 
     raw = (response.output_text or "").strip()
 
-    # --- 1) Guardrails schema enforcement + repair ---
+    # --- 1) Guardrails schema enforcement + repair (optional) ---
     if GUARDRAILS_AVAILABLE and guard_findings is not None:
-    try:
-        validated = guard_findings.parse(raw)
-        classified = [f.model_dump() for f in validated]
-        print(f"[{RISK_AGENT_NAME}] Classification complete via Guardrails.")
-        return classified
-    except Exception as e:
-        print(f"[{RISK_AGENT_NAME}] Guardrails error, falling back. {e}")
-    
+        try:
+            validated = guard_findings.parse(raw)
+            classified = [f.model_dump() for f in validated]
+            print(f"[{RISK_AGENT_NAME}] Classification complete via Guardrails.")
+            return classified
+        except Exception as e:
+            print(f"[{RISK_AGENT_NAME}] Guardrails error, falling back. {e}")
+
     # --- 2) Fallback: your original JSON parsing ---
     try:
         start = raw.find("[")
