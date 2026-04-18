@@ -26,9 +26,13 @@ python-multipart
 
 # HTTP calls (if your agents call APIs / LLMs)
 requests
+httpx
 
 # Likely needed for your multi-agent / LLM supervisor (if used)
 langchain
 langchain-community
 openai
 langchain-openai
+
+# Guardrails for schema enforcement / output validation
+guardrails-ai
