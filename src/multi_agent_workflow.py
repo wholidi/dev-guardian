@@ -6,7 +6,11 @@ import json
 import time
 
 from .ai_agent import analyze_path, get_client, MODEL_NAME
-from .guardrails_utils import guard_findings 
+from .guardrails_utils import guard_findings
+    GUARDRAILS_AVAILABLE = True
+except ImportError:
+    guard_findings = None
+    GUARDRAILS_AVAILABLE = False
 
 # ---------- Agent 1: ScanAgent ----------
 
