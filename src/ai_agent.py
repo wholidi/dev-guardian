@@ -90,13 +90,25 @@ def analyze_file(file_path: Path) -> List[Dict[str, Any]]:
 
     print(f"\n--- Analyzing {file_path} ---\n")
 
-    response = get_client().responses.create(
-        model=MODEL_NAME,
-        instructions=SECURITY_INSTRUCTIONS,
-        input=[{"role": "user", "content": text}],
-        max_output_tokens=1500,
-    )
-    
+ #   response = get_client().responses.create(
+ #      model=MODEL_NAME,
+ #      instructions=SECURITY_INSTRUCTIONS,
+ #      input=[{"role": "user", "content": text}],
+ #      max_output_tokens=1500,
+ #  )
+
+# TEMP: mock response to avoid OpenAI quota issue
+print("[MockMode] Skipping OpenAI call due to quota limit.")
+
+return [
+    {
+        "title": "Potential Injection Risk",
+        "severity": "high",
+        "location": str(file_path),
+        "description": "User input is directly used without sanitization.",
+        "recommendation": "Validate and sanitize all external inputs."
+    }
+]
     raw_text = (response.output_text or "").strip()
     print(f"\nRAW MODEL OUTPUT for {file_path}:\n{raw_text}\n")
 
