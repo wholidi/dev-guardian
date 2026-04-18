@@ -1,4 +1,9 @@
-from guardrails import Guard
+try:
+    from guardrails import Guard
+    # your existing guard_findings setup here
+except ImportError:
+    Guard = None
+    guard_findings = None
 from pydantic import BaseModel
 from typing import List, Optional
 
