@@ -33,6 +33,3 @@ langchain
 langchain-community
 openai
 langchain-openai
-
-# Guardrails for schema enforcement / output validation
-guardrails-ai
