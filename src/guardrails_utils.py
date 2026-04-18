@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-# ----- Pydantic schema for validated + repaired findings -----
-
 class Finding(BaseModel):
     title: str
     severity: str
@@ -20,5 +18,5 @@ try:
         FindingsList,
         num_reasks=1,
     )
-except ImportError:
+except (ImportError, Exception):
     guard_findings = None
