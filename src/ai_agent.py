@@ -5,10 +5,9 @@ from typing import List, Dict, Any
 
 from dotenv import load_dotenv
 from openai import OpenAI
-import httpx  # <-- add this import
-import os
+import httpx
 
-from .report_html import save_html_report  # <-- use your HTML helper
+from .report_html import save_html_report
 
 # ----------------------------------------------------------
 # Load env
@@ -18,6 +17,7 @@ load_dotenv()
 # Lazy client — initialized on first use, not at import time
 _http_client = httpx.Client(timeout=60.0)
 _client = None
+
 
 def get_client() -> OpenAI:
     global _client
@@ -33,6 +33,7 @@ def get_client() -> OpenAI:
             http_client=_http_client,
         )
     return _client
+
 
 MODEL_NAME = "o3-mini"
 INCLUDE_EXTENSIONS = {".py", ".js", ".ts", ".java", ".cs", ".go"}
@@ -68,6 +69,9 @@ Return ONLY a JSON array. Each element MUST be an object with:
 - recommendation
 """
 
+# Toggle this when your OpenAI quota is available again.
+USE_REAL_LLM = False
+
 
 # --------------------- single file ------------------------
 def analyze_file(file_path: Path) -> List[Dict[str, Any]]:
@@ -75,7 +79,6 @@ def analyze_file(file_path: Path) -> List[Dict[str, Any]]:
     Analyze a single file with the LLM.
     Tries to salvage as many valid finding objects as possible from imperfect JSON.
     """
-    # Only scan common text/code files
     if file_path.suffix.lower() not in {".py", ".js", ".ts", ".html", ".htm", ".txt", ".json", ".yaml", ".yml"}:
         return []
 
@@ -90,39 +93,38 @@ def analyze_file(file_path: Path) -> List[Dict[str, Any]]:
 
     print(f"\n--- Analyzing {file_path} ---\n")
 
- #   response = get_client().responses.create(
- #      model=MODEL_NAME,
- #      instructions=SECURITY_INSTRUCTIONS,
- #      input=[{"role": "user", "content": text}],
- #      max_output_tokens=1500,
- #  )
+    if not USE_REAL_LLM:
+        print("[MockMode] Skipping OpenAI call due to quota limit.")
+        return [
+            {
+                "title": "Demo Finding",
+                "severity": "low",
+                "location": str(file_path),
+                "description": "This is a simulated result for demo purposes.",
+                "recommendation": "Replace mock mode with real analysis when API quota is available.",
+                "source_file": str(file_path),
+            }
+        ]
 
-# TEMP: mock response to avoid OpenAI quota issue
-print("[MockMode] Skipping OpenAI call due to quota limit.")
+    response = get_client().responses.create(
+        model=MODEL_NAME,
+        instructions=SECURITY_INSTRUCTIONS,
+        input=[{"role": "user", "content": text}],
+        max_output_tokens=1500,
+    )
 
-return [
-    {
-        "title": "Potential Injection Risk",
-        "severity": "high",
-        "location": str(file_path),
-        "description": "User input is directly used without sanitization.",
-        "recommendation": "Validate and sanitize all external inputs."
-    }
-]
     raw_text = (response.output_text or "").strip()
     print(f"\nRAW MODEL OUTPUT for {file_path}:\n{raw_text}\n")
 
     if raw_text == "" or raw_text == "[]":
         return []
 
-    # ---- 1) First, try to extract the best [...]-shaped chunk ----
     start = raw_text.find("[")
     end = raw_text.rfind("]")
     candidate = raw_text[start : end + 1] if start != -1 and end != -1 else raw_text
 
     findings: List[Dict[str, Any]] = []
 
-    # ---- 2) Try normal list JSON parse ----
     try:
         parsed = json.loads(candidate)
         if isinstance(parsed, dict):
@@ -130,7 +132,6 @@ return [
         if isinstance(parsed, list):
             findings = parsed
     except Exception:
-        # ---- 3) Fallback: parse each {...} block separately ----
         import re
 
         print(f"[ScanAgent] Bulk JSON parse failed for {file_path}, trying object-by-object.")
@@ -144,7 +145,6 @@ return [
                 if isinstance(obj, dict):
                     objs.append(obj)
             except Exception:
-                # ignore individual broken objects
                 continue
 
         findings = objs
@@ -153,12 +153,12 @@ return [
         print(f"[ScanAgent] No valid finding objects parsed for {file_path}.")
         return []
 
-    # Add file path to each finding
     for f in findings:
         f.setdefault("source_file", str(file_path))
 
     print(f"[ScanAgent] Parsed {len(findings)} findings from {file_path}.")
     return findings
+
 
 # --------------------- file OR folder ---------------------
 def analyze_path(path: Path) -> List[Dict[str, Any]]:
@@ -221,7 +221,6 @@ if __name__ == "__main__":
     print("\nFINAL FINDINGS:\n")
     print(json.dumps(results, indent=2, ensure_ascii=False))
 
-    # JSON file
     if args.output:
         out_path = Path(args.output).resolve()
         out_path.write_text(
@@ -230,7 +229,6 @@ if __name__ == "__main__":
         )
         print(f"\nSaved findings JSON to {out_path}")
 
-    # HTML report
     if args.html:
         html_path = (
             Path(args.html_path).resolve()
