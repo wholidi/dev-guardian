@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Callable
 import json
 import time
 
-from .ai_agent import analyze_path, client, MODEL_NAME
+from .ai_agent import analyze_path, get_client, MODEL_NAME
 from .guardrails_utils import guard_findings 
 
 # ---------- Agent 1: ScanAgent ----------
@@ -45,7 +45,7 @@ def risk_classifier_agent(findings: List[Dict[str, Any]]) -> List[Dict[str, Any]
         return []
 
     print(f"[{RISK_AGENT_NAME}] Classifying {len(findings)} findings.")
-    response = client.responses.create(
+    response = get_client().responses.create(
         model=MODEL_NAME,
         instructions=RISK_CLASSIFIER_PROMPT,
         input=[{"role": "user", "content": json.dumps(findings, ensure_ascii=False)}],
@@ -101,7 +101,7 @@ def summary_agent(findings: List[Dict[str, Any]]) -> str:
         return "No security issues were detected in the analyzed codebase."
 
     print(f"[{SUMMARY_AGENT_NAME}] Creating executive summary.")
-    response = client.responses.create(
+    response = get_client().responses.create(
         model=MODEL_NAME,
         instructions=SUMMARY_PROMPT,
         input=[{"role": "user", "content": json.dumps(findings, ensure_ascii=False)}],
@@ -136,7 +136,7 @@ Return ONLY a compact JSON object:
 def supervisor_agent(user_request: str) -> Dict[str, Any]:
     print(f"[{SUPERVISOR_AGENT_NAME}] Routing request: {user_request!r}")
 
-    response = client.responses.create(
+    response = get_client().responses.create(
         model=MODEL_NAME,
         instructions=SUPERVISOR_PROMPT,
         input=[{"role": "user", "content": user_request}],
