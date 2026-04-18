@@ -11,18 +11,28 @@ import os
 from .report_html import save_html_report  # <-- use your HTML helper
 
 # ----------------------------------------------------------
-# Load env + Seagate endpoint
+# Load env
 # ----------------------------------------------------------
 load_dotenv()
 
-# Create our own HTTPX client so OpenAI doesn't try to create one with `proxies=...`
-http_client = httpx.Client(timeout=60.0)
+# Lazy client — initialized on first use, not at import time
+_http_client = httpx.Client(timeout=60.0)
+_client = None
 
-client = OpenAI(
-    base_url="https://api.openai.com/v1",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    http_client=http_client,  # <-- this bypasses the internal proxy handling
-)
+def get_client() -> OpenAI:
+    global _client
+    if _client is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "OPENAI_API_KEY is not set. Add it to Railway Variables."
+            )
+        _client = OpenAI(
+            base_url="https://api.openai.com/v1",
+            api_key=api_key,
+            http_client=_http_client,
+        )
+    return _client
 
 MODEL_NAME = "o3-mini"
 INCLUDE_EXTENSIONS = {".py", ".js", ".ts", ".java", ".cs", ".go"}
@@ -80,13 +90,13 @@ def analyze_file(file_path: Path) -> List[Dict[str, Any]]:
 
     print(f"\n--- Analyzing {file_path} ---\n")
 
-    response = client.responses.create(
+    response = get_client().responses.create(
         model=MODEL_NAME,
         instructions=SECURITY_INSTRUCTIONS,
         input=[{"role": "user", "content": text}],
         max_output_tokens=1500,
     )
-
+    
     raw_text = (response.output_text or "").strip()
     print(f"\nRAW MODEL OUTPUT for {file_path}:\n{raw_text}\n")
 
