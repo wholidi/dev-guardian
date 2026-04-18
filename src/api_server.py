@@ -24,9 +24,9 @@ from .report_html import findings_to_html
 # FastAPI app
 # -------------------------------------------------
 app = FastAPI(
-    title="GenAI Security Agent",
-    description="Seagate GenAI-powered security review service",
+    title="Dev Guardian – AI Audit & Runtime Monitoring",
     version="1.0.0",
+    description="Transforms AI behavior into audit-ready signals and governance evidence"
 )
 
 # -------------------------------------------------
