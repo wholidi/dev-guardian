@@ -1,9 +1,3 @@
-try:
-    from guardrails import Guard
-    # your existing guard_findings setup here
-except ImportError:
-    Guard = None
-    guard_findings = None
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -20,8 +14,11 @@ class Finding(BaseModel):
 
 FindingsList = List[Finding]
 
-guard_findings = Guard.from_pydantic(
-    FindingsList,
-    # e.g. auto-correct invalid severities:
-    num_reasks=1,
-)
+try:
+    from guardrails import Guard
+    guard_findings = Guard.from_pydantic(
+        FindingsList,
+        num_reasks=1,
+    )
+except ImportError:
+    guard_findings = None
