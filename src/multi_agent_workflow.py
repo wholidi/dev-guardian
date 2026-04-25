@@ -5,9 +5,15 @@ from typing import List, Dict, Any, Callable
 import json
 import time
 
-from .ai_agent import analyze_path, get_client, MODEL_NAME
+from .ai_agent import (
+    analyze_path, get_client,
+    SCAN_MODEL, CLASSIFY_MODEL, SUMMARY_MODEL, SUPERVISOR_MODEL,
+    MAX_TOKENS_CLASSIFY, MAX_TOKENS_SUMMARY_TECH, MAX_TOKENS_SUMMARY_EXEC,
+    MAX_TOKENS_SUPERVISOR,
+    _log_usage,
+)
 
-# Guardrails is optional — app works without it
+# Guardrails is optional ??? app works without it
 try:
     from .guardrails_utils import guard_findings
     GUARDRAILS_AVAILABLE = True
@@ -53,11 +59,15 @@ def risk_classifier_agent(findings: List[Dict[str, Any]]) -> List[Dict[str, Any]
 
     print(f"[{RISK_AGENT_NAME}] Classifying {len(findings)} findings.")
     response = get_client().responses.create(
-        model=MODEL_NAME,
+        model=CLASSIFY_MODEL,
         instructions=RISK_CLASSIFIER_PROMPT,
-        input=[{"role": "user", "content": json.dumps(findings, ensure_ascii=False)}],
-        max_output_tokens=1500,
+        input=[{"role": "user", "content": "Return a JSON array of enriched findings.\n\n" + json.dumps(findings, ensure_ascii=False)}],
+        max_output_tokens=MAX_TOKENS_CLASSIFY,              # Control 1
+        text={"format": {"type": "json_object"}},           # Control 4
     )
+
+    # Control 5: log token usage
+    _log_usage(RISK_AGENT_NAME, CLASSIFY_MODEL, getattr(response, "usage", None), f"{len(findings)} findings")
 
     raw = (response.output_text or "").strip()
 
@@ -97,24 +107,30 @@ You are a senior security architect. Create a concise summary of the findings.
 
 Include:
 - Overall risk level (low/medium/high/critical) for the project
-- 3–5 key issues to fix first
+- 3???5 key issues to fix first
 - Any quick wins or hardening recommendations
 
 Return plain text, max ~300 words.
 """
 
-def summary_agent(findings: List[Dict[str, Any]]) -> str:
+def summary_agent(findings: List[Dict[str, Any]], executive_mode: bool = False) -> str:
     if not findings:
         print(f"[{SUMMARY_AGENT_NAME}] No findings, returning clean summary.")
         return "No security issues were detected in the analyzed codebase."
 
-    print(f"[{SUMMARY_AGENT_NAME}] Creating executive summary.")
+    max_tok = MAX_TOKENS_SUMMARY_EXEC if executive_mode else MAX_TOKENS_SUMMARY_TECH
+    mode_label = "executive" if executive_mode else "technical"
+
+    print(f"[{SUMMARY_AGENT_NAME}] Creating {mode_label} summary (max_tokens={max_tok}).")
     response = get_client().responses.create(
-        model=MODEL_NAME,
+        model=SUMMARY_MODEL,
         instructions=SUMMARY_PROMPT,
-        input=[{"role": "user", "content": json.dumps(findings, ensure_ascii=False)}],
-        max_output_tokens=500,
+        input=[{"role": "user", "content": "Return a JSON array of enriched findings.\n\n" + json.dumps(findings, ensure_ascii=False)}],
+        max_output_tokens=max_tok,    # Control 1 ??? flex by mode
     )
+
+    # Control 5: log token usage
+    _log_usage(SUMMARY_AGENT_NAME, SUMMARY_MODEL, getattr(response, "usage", None), mode_label)
 
     return (response.output_text or "").strip()
 
@@ -145,11 +161,15 @@ def supervisor_agent(user_request: str) -> Dict[str, Any]:
     print(f"[{SUPERVISOR_AGENT_NAME}] Routing request: {user_request!r}")
 
     response = get_client().responses.create(
-        model=MODEL_NAME,
+        model=SUPERVISOR_MODEL,
         instructions=SUPERVISOR_PROMPT,
-        input=[{"role": "user", "content": user_request}],
-        max_output_tokens=300,
+        input=[{"role": "user", "content": "Return a JSON object with your routing decision.\n\n" + user_request}],
+        max_output_tokens=MAX_TOKENS_SUPERVISOR,            # Control 1
+        text={"format": {"type": "json_object"}},           # Control 4
     )
+
+    # Control 5: log token usage
+    _log_usage(SUPERVISOR_AGENT_NAME, SUPERVISOR_MODEL, getattr(response, "usage", None), "routing")
 
     raw = (response.output_text or "").strip()
     try:
@@ -177,12 +197,16 @@ def supervisor_agent(user_request: str) -> Dict[str, Any]:
 
 # ---------- Coordinator: orchestrate all agents ----------
 
-def security_scan_workflow(project_path: Path) -> Dict[str, Any]:
+def security_scan_workflow(project_path: Path, executive_mode: bool = False) -> Dict[str, Any]:
     """
     Security scan workflow:
       1) ScanAgent           -> raw findings
       2) RiskClassifierAgent -> normalized/enriched findings
       3) SummaryAgent        -> human-readable summary
+
+    Args:
+        executive_mode: If True, SummaryAgent uses higher token cap and
+                        narrative style. If False, technical concise output.
     """
 
     workflow_trace: List[Dict[str, Any]] = []
@@ -209,9 +233,9 @@ def security_scan_workflow(project_path: Path) -> Dict[str, Any]:
         "total_findings": len(classified_findings),
     })
 
-    # 3) SummaryAgent
+    # 3) SummaryAgent ??? executive_mode controls token budget
     t4 = time.time()
-    summary = summary_agent(classified_findings)
+    summary = summary_agent(classified_findings, executive_mode=executive_mode)
     t5 = time.time()
     workflow_trace.append({
         "agent": SUMMARY_AGENT_NAME,
@@ -260,3 +284,5 @@ def run_workflow_with_supervisor(project_path: Path, user_request: str) -> Dict[
         "module_name": module_name,
         "result": result,
     }
+
+
