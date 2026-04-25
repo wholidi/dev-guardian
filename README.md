@@ -2,7 +2,7 @@
 
 **GenAI-Powered Security Agent** — an intelligent, automated code-review system that identifies security weaknesses in source code and projects using a multi-agent LLM workflow.
 
-Built for the **Seagate GenAI Hackathon** and extended with blue team governance controls for **AISB Singapore 2026**.
+Built for the **Seagate GenAI Hackathon** and extended with blue team governance controls inspired by **AISB Singapore 2026**.
 
 🌐 **Live Demo:** https://devguardian-urielle-ai.up.railway.app/ui
 
@@ -240,5 +240,5 @@ Dev Guardian is a security research and educational tool. The `Testing/` directo
 
 ---
 
-*Built by Urielle AI Audit · AISB Singapore 2026 · Blue Team Governance*
+*Built by Urielle AI Audit · Blue Team Governance*
 
