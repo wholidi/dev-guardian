@@ -61,7 +61,7 @@ Dev Guardian combines multi-agent analysis, Guardrails validation, and LangChain
 
 ---
 
-## 🔒 Blue Team Governance (AISB Singapore 2026)
+## 🔒 Blue Team Governance 
 
 Dev Guardian was extended with a three-layer token control and threat-modelled governance framework as part of AISB Singapore 2026 blue team testing.
 
@@ -92,8 +92,7 @@ SUPERVISOR_MODEL = "gpt-4.1-nano"   # Routing JSON only
 
 ---
 
-## 🧪 Test Results — AISB Singapore 2026
-
+## 🧪 Test Results 
 **Final Score: 100/100 · 7/7 PASS · Production Ready**
 
 | TC | Test | Findings | Result |
