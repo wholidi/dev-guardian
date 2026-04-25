@@ -63,7 +63,7 @@ Dev Guardian combines multi-agent analysis, Guardrails validation, and LangChain
 
 ## 🔒 Blue Team Governance 
 
-Dev Guardian was extended with a three-layer token control and threat-modelled governance framework as part of AISB Singapore 2026 blue team testing.
+Dev Guardian was extended with a three-layer token control and threat-modelled governance framework
 
 ### Layer 1 — OpenAI Platform Controls
 - Monthly budget cap with spend alerts at 50% / 80% / 100%
