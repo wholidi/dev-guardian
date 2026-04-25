@@ -121,7 +121,7 @@ dev-guardian/
 │   ├── langchain_supervisor_workflow.py # Executive report mode
 │   └── report_html.py                 # HTML report generator
 ├── Testing/
-│   ├── AISB test plan/                # TC-01 to TC-07 test files
+│   ├── Blue team test/                # TC-01 to TC-07 test files
 │   └── README.md                      # Test methodology + results
 ├── docs/                              # Technical documentation
 ├── samples/                           # Example scan targets
