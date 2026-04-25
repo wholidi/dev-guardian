@@ -33,3 +33,6 @@ langchain
 langchain-community
 openai
 langchain-openai
+
+# Token usage management 
+tiktoken
