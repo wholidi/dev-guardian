@@ -52,6 +52,7 @@ Record results
 💡 Tip: Record results immediately after each scan.
 
 🧪 Test Cases
+
 🔴 LLM01 — Prompt Injection
 Field	Value
 File	owasp_llm01_prompt_injection.py
