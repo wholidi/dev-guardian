@@ -1,5 +1,5 @@
 # Dev Guardian — Test Suite
-**Urielle AI Audit · AISB Singapore 2026 · Blue Team Governance**
+**Urielle AI Audit · Blue Team Governance**
 
 ---
 
