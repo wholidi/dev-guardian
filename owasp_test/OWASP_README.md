@@ -1,6 +1,6 @@
 🛡️ Dev Guardian — OWASP LLM Top 10 Testing Guide
 
-Urielle AI Audit · AISB Singapore 2026 · Blue Team Governance
+Urielle AI Audit · Blue Team Governance
 
 🔗 Quick Links
 🌐 Live Test UI
