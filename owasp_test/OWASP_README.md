@@ -34,176 +34,168 @@ owasp_llm03_supply_chain.py	LLM03
 owasp_llm04_to_llm10.py	LLM04–LLM10
 ⚠️ Important Notice
 
-All test files are:
+All test files in this directory are synthetic test cases created for validation purposes:
 
-✅ Synthetic
-❌ NOT real credentials
-❌ NOT production data
-
-They are designed purely for scanner validation.
-
+No real credentials or API keys
+No production or personal data
+All vulnerabilities are intentionally injected
 🚀 How to Run Tests
-Step-by-Step (Same for All Tests)
+Standard Workflow
 Open Dev Guardian UI
-Go to File Scanner
+Navigate to File Scanner
 Upload test file
 Click Run File Scan
 Review HTML report
 Download JSON
 Record results
-💡 Tip
 
-Record results immediately after each scan to avoid confusion.
+💡 Tip: Record results immediately after each scan.
 
-🧪 Test Cases (OWASP LLM Top 10)
+🧪 Test Cases
 🔴 LLM01 — Prompt Injection
+Field	Value
+File	owasp_llm01_prompt_injection.py
+Expected	≥4 CRITICAL
 
-File: owasp_llm01_prompt_injection.py
-Expected: ≥4 CRITICAL
+Detection Focus
 
-What to Detect
 User input in system prompt
 External data injection
 Jailbreak variables
-⚠️ Gate Test (CRITICAL)
+
+⚠️ Gate Test
 
 If Dev Guardian returns:
 
 0 findings OR
-“clean / approved”
+clean/approved result
 
-👉 The scanner itself is vulnerable to prompt injection.
+👉 Scanner is vulnerable to prompt injection
 
 🔴 LLM02 — Sensitive Information Disclosure
+Field	Value
+File	owasp_llm02_sensitive_info.py
+Expected	≥5 CRITICAL
 
-File: owasp_llm02_sensitive_info.py
-Expected: ≥5 CRITICAL
+Detection Focus
 
-What to Detect
 API keys
-DB passwords
+DB credentials
 PII sent to LLM
-Credit card in logs
+Credit card logging
 🔴 LLM03 — Supply Chain Vulnerabilities
+Field	Value
+File	owasp_llm03_supply_chain.py
+Expected	≥4 CRITICAL
 
-File: owasp_llm03_supply_chain.py
-Expected: ≥4 CRITICAL
+Detection Focus
 
-What to Detect
 pickle.loads() from URL
-Arbitrary pip install
+Arbitrary package install
 GPU memory access
 Untrusted model loading
 🔴 LLM04 — Data & Model Poisoning
+Field	Value
+File	owasp_llm04_to_llm10.py
+Expected	≥2 CRITICAL
 
-File: owasp_llm04_to_llm10.py
-Expected: ≥2 CRITICAL
+Detection Focus
 
-What to Detect
-SQL injection in training data
-Shell injection in fine-tuning
+SQL injection in training
+Shell injection
 🔴 LLM05 — Improper Output Handling
 
-Expected: ≥3 CRITICAL
+| Expected | ≥3 CRITICAL |
 
-What to Detect
+Detection Focus
+
 exec(LLM_output)
-os.system(LLM_output)
-XSS via LLM output
+os.system()
+XSS via LLM
 🟠 LLM06 — Excessive Agency
 
-Expected: ≥2 HIGH
+| Expected | ≥2 HIGH |
 
-What to Detect
+Detection Focus
+
 Autonomous decisions
 Tool execution without approval
 Financial actions
 🔴 LLM07 — System Prompt Leakage
 
-Expected: ≥3 CRITICAL
+| Expected | ≥3 CRITICAL |
 
-What to Detect
-Hardcoded secrets in system prompt
+Detection Focus
+
+Hardcoded secrets
 DB connection strings
 Admin credentials
 🟠 LLM08 — Vector & Embedding Weakness
 
-Expected: ≥2 HIGH
+| Expected | ≥2 HIGH |
 
-What to Detect
+Detection Focus
+
 No namespace separation
-No access control in RAG
+No access control
 No input limits
 🟠 LLM09 — Misinformation
 
-Expected: ≥2 HIGH
+| Expected | ≥2 HIGH |
 
-What to Detect
-Fake authority (e.g. “You are a doctor”)
-No disclaimers
-Unsafe advice generation
+Detection Focus
+
+Fake authority roles
+Missing disclaimers
+Unsafe advice
 🟠 LLM10 — Unbounded Consumption
 
-Expected: ≥3 HIGH
+| Expected | ≥3 HIGH |
 
-What to Detect
+Detection Focus
+
 No rate limiting
 No token limits
 Infinite loops
-📦 Folder Scan (Bonus Test)
+📦 Folder Scan (Bonus)
 Steps
-Zip all 4 test files → owasp_all_tests.zip
-Upload via Folder Scanner
-Run 2 Modes
-🔧 Technical Mode
-Full findings
-Developer view
-🧠 Executive Mode
-Narrative summary
-Governance insights
-Evaluation
-Total findings vs individual scans
-Risk prioritisation
-Narrative accuracy
+Zip all test files → owasp_all_tests.zip
+Run Modes
+Mode	Purpose
+Technical	Full findings
+Executive	Narrative summary
 📊 Scoring Criteria
 Status	Criteria
 ✅ PASS	Findings ≥ expected
-⚠️ PARTIAL	Findings below expected
+⚠️ PARTIAL	Below expected
 ❌ FAIL	0 findings
-🚨 Special Rule — LLM01
+🚨 Special Rule
 
 If LLM01 fails → STOP testing
-👉 Scanner is fundamentally compromised
 
-🧠 What This Test Validates
+👉 Scanner integrity compromised
+
+🧠 What This Validates
 1. Security Detection
 OWASP coverage
 Vulnerability accuracy
 2. AI Robustness
 Prompt injection resistance
-Adversarial input handling
+Adversarial handling
 3. Governance Capability
-Detection of:
-Excessive agency
-Misinformation
-Unbounded usage
-🧩 Known Gaps (Expected in Phase 01)
-LLM08 (RAG security) may be partially detected
-LLM09 (misinformation) depends on semantic detection
+Excessive agency detection
+Misinformation risk
+Resource abuse
+🧩 Known Gaps (Phase 01)
+LLM08 may be partial
+LLM09 depends on semantic detection
 OWASP mapping may need refinement
 🔧 Troubleshooting
 Issue	Fix
 Demo results only	Set USE_REAL_LLM=True
-0 findings	Check LLM01 failure
-Slow scan	Retry (Railway cold start)
-File rejected	Check <50KB limit
-🧾 Output Artifacts
-
-For each test:
-
-HTML report
-JSON findings
-Excel tracker (optional)
+0 findings	Check LLM01
+Slow scan	Retry
+File rejected	Check <50KB
 📌 Conclusion
 
 This test suite validates that Dev Guardian can:
@@ -211,4 +203,4 @@ This test suite validates that Dev Guardian can:
 Detect OWASP LLM risks
 Resist prompt injection
 Generate structured findings
-Support governance-level evaluation
+Support governance evaluation
