@@ -78,11 +78,11 @@ File	owasp_llm02_sensitive_info.py
 Expected	≥5 CRITICAL
 
 Detection Focus
-
 API keys
 DB credentials
 PII sent to LLM
 Credit card logging
+
 🔴 LLM03 — Supply Chain Vulnerabilities
 Field	Value
 File	owasp_llm03_supply_chain.py
@@ -94,6 +94,7 @@ pickle.loads() from URL
 Arbitrary package install
 GPU memory access
 Untrusted model loading
+
 🔴 LLM04 — Data & Model Poisoning
 Field	Value
 File	owasp_llm04_to_llm10.py
@@ -103,6 +104,7 @@ Detection Focus
 
 SQL injection in training
 Shell injection
+
 🔴 LLM05 — Improper Output Handling
 
 | Expected | ≥3 CRITICAL |
@@ -112,6 +114,7 @@ Detection Focus
 exec(LLM_output)
 os.system()
 XSS via LLM
+
 🟠 LLM06 — Excessive Agency
 
 | Expected | ≥2 HIGH |
@@ -121,6 +124,7 @@ Detection Focus
 Autonomous decisions
 Tool execution without approval
 Financial actions
+
 🔴 LLM07 — System Prompt Leakage
 
 | Expected | ≥3 CRITICAL |
@@ -130,6 +134,7 @@ Detection Focus
 Hardcoded secrets
 DB connection strings
 Admin credentials
+
 🟠 LLM08 — Vector & Embedding Weakness
 
 | Expected | ≥2 HIGH |
@@ -139,6 +144,7 @@ Detection Focus
 No namespace separation
 No access control
 No input limits
+
 🟠 LLM09 — Misinformation
 
 | Expected | ≥2 HIGH |
@@ -148,6 +154,7 @@ Detection Focus
 Fake authority roles
 Missing disclaimers
 Unsafe advice
+
 🟠 LLM10 — Unbounded Consumption
 
 | Expected | ≥3 HIGH |
