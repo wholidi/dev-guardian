@@ -354,7 +354,7 @@ def build_html_report_with_lc(
   </script>
   <script>
     // JSON blob injected by the backend
-    const reportJson = {{REPORT_JSON}};
+    const reportJson = __REPORT_JSON_SENTINEL__;
 
     function downloadJson() {{
       const data = JSON.stringify(reportJson, null, 2);
@@ -382,8 +382,10 @@ def render_html_report(summary: str, findings: List[Dict[str, Any]], lc_summary:
             "lc_summary": lc_summary,
         },
         indent=2,
+        ensure_ascii=False,
     )
-    html_doc = html_doc.replace("{REPORT_JSON}", json_blob)
+    # Sentinel token is safe to replace: not affected by f-string brace escaping
+    html_doc = html_doc.replace("__REPORT_JSON_SENTINEL__", json_blob)
     return HTMLResponse(content=html_doc)
 
 # -------------------------------------------------

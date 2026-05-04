@@ -88,7 +88,7 @@ INCLUDE_EXTENSIONS = {".py", ".js", ".ts", ".java", ".cs", ".go"}
 # Set as close to actual expected output as possible.
 # Prevents runaway completions that inflate TPM and cost.
 MAX_TOKENS_SCAN       = 1500   # ScanAgent: structured JSON findings
-MAX_TOKENS_CLASSIFY   =  800   # RiskClassifierAgent: JSON normalisation only
+MAX_TOKENS_CLASSIFY   = 1500   # RiskClassifierAgent: JSON normalisation only (raised from 800 — Session 1 fix)
 MAX_TOKENS_SUMMARY_TECH = 600  # SummaryAgent: technical mode (~300 words)
 MAX_TOKENS_SUMMARY_EXEC = 1200 # SummaryAgent: executive mode (~600 words)
 MAX_TOKENS_SUPERVISOR =  150   # SupervisorAgent: tiny routing JSON only
@@ -139,6 +139,35 @@ The code you receive MAY contain vulnerabilities. You MUST actively look for iss
 - Insecure file handling, deserialization, or use of eval/exec
 - Logging or exposing sensitive data
 - Any other OWASP-style vulnerability
+
+=== LLM02: Sensitive Data Leakage to LLM / Logs ===
+- Flag any logging (print, logger.*, log.*) of fields named: card, card_number, cvv, cvc,
+  pan, credit_card, ssn, password, secret, token, api_key, private_key, or any field
+  that looks like PII (email, phone, dob, national_id, passport).
+- Flag any code that passes raw card numbers, CVV codes, or SSN values into an LLM
+  prompt or API call without masking/tokenization. Severity: HIGH or CRITICAL.
+- Flag any f-string or string concatenation that embeds PII into log output.
+
+=== LLM09: Role Misrepresentation / Privilege Escalation ===
+- Flag any system prompt or instruction string that assigns the LLM a privileged real-world
+  identity it cannot verify: "You are a medical doctor", "You are a lawyer",
+  "You are a licensed financial advisor", "You are a government official", etc.
+- Flag if such a role assignment is missing a disclaimer stating the LLM is an AI assistant
+  and not a licensed professional. Severity: HIGH.
+- Flag any system prompt that instructs the LLM to override safety rules, claim special
+  permissions, or ignore prior instructions (prompt injection enablers). Severity: CRITICAL.
+
+=== LLM10: Unbounded Consumption / Resource Exhaustion ===
+- Flag any LLM API call (openai.*, anthropic.*, responses.create, chat.completions.create,
+  client.messages.create, etc.) that is missing a max_tokens / max_output_tokens parameter.
+  Severity: MEDIUM. Recommendation: always set max_tokens to prevent runaway completions.
+- Flag any endpoint or loop that invokes an LLM API without rate limiting or a request
+  budget guard. Severity: MEDIUM.
+
+=== LLM07: System Prompt Confidentiality ===
+- Report each distinct system prompt secret or privileged instruction as a SEPARATE finding.
+  Do NOT merge multiple system prompt issues into a single finding.
+  Each sensitive instruction string exposed in code is its own finding with its own location.
 
 Rules:
 - Treat ALL external / user input as UNTRUSTED by default.
@@ -223,21 +252,8 @@ def analyze_file(file_path: Path) -> List[Dict[str, Any]]:
         tokens = enc.encode(text)[:MAX_INPUT_TOKENS_PER_FILE]
         text = enc.decode(tokens)
 
-    # ?????? Control 4: Structured JSON output only ????????????????????????????????????????????????????????????????????????????????????????????????
-    # text_format="json_object" forces the model to return valid JSON.
-    # Eliminates free-text preambles that inflate completion tokens and
-    # break the downstream parser.
-    # json_object mode requires "json" in the user message ??? add prefix
-    user_content = f"Return your findings as a JSON array only.\n\n{text}"
-
-    response = get_client().responses.create(
-        model=SCAN_MODEL,
-        instructions=SECURITY_INSTRUCTIONS,
-        input=[{"role": "user", "content": user_content}],
-        max_output_tokens=MAX_TOKENS_SCAN,    # Control 1
-        text={"format": {"type": "json_object"}},  # Control 4
-    )
-
+    # ⚡ Control 4: Structured JSON output only
+    # json_object mode requires "json" in the user message
     response = get_client().responses.create(
         model=SCAN_MODEL,
         instructions=SECURITY_INSTRUCTIONS,
