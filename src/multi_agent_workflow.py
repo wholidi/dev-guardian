@@ -49,6 +49,10 @@ Tasks:
 2. (Optional) Add `owasp_category` if you can map it (e.g., A01: Broken Access Control).
 3. Do NOT remove any finding. Only enrich or normalize.
 
+=== LLM07 Rule — System Prompt Confidentiality ===
+Each distinct system prompt issue must remain as a SEPARATE finding.
+Do NOT merge multiple system prompt findings into one, even if they are in the same file.
+
 Return ONLY a JSON array of findings with the same fields plus optional `owasp_category`.
 """
 
@@ -74,8 +78,14 @@ def risk_classifier_agent(findings: List[Dict[str, Any]]) -> List[Dict[str, Any]
     # --- 1) Guardrails schema enforcement + repair (optional) ---
     if GUARDRAILS_AVAILABLE and guard_findings is not None:
         try:
-            validated = guard_findings.parse(raw)
-            classified = [f.model_dump() for f in validated]
+            # Parse raw JSON first, then validate through Pydantic guard
+            start = raw.find("[")
+            end = raw.rfind("]")
+            candidate = raw[start : end + 1] if start != -1 and end != -1 else raw
+            pre_parsed = json.loads(candidate)
+            if isinstance(pre_parsed, dict):
+                pre_parsed = [pre_parsed]
+            classified = guard_findings(pre_parsed)   # accepts list → normalises + validates
             print(f"[{RISK_AGENT_NAME}] Classification complete via Guardrails.")
             return classified
         except Exception as e:
