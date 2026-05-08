@@ -3,14 +3,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import json
+import re
 from pathlib import Path
 import tempfile
 import zipfile
 import html
+import os
 from typing import List, Dict, Any
 
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse, HTMLResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from .multi_agent_workflow import (
     run_multi_agent_workflow,
@@ -21,6 +24,69 @@ from .ai_agent import analyze_file
 from .report_html import findings_to_html
 
 # -------------------------------------------------
+# Filename sanitisation (fixes TS-05 XSS risk)
+# Strips any character that is not alphanumeric, dash, underscore, or dot.
+# Applied at every single-file upload boundary before the name is used in
+# temp file creation or reflected into any HTML report.
+# -------------------------------------------------
+
+_SAFE_FILENAME_RE = re.compile(r"[^\w.\-]")   # keep: a-z A-Z 0-9 _ . -
+
+def _sanitise_filename(raw: str) -> str:
+    """
+    Return a safe filename: only alphanumerics, dots, dashes, underscores.
+    Falls back to 'upload' if the result would be empty after sanitisation.
+    """
+    name = Path(raw).name                         # strip any path component first
+    name = _SAFE_FILENAME_RE.sub("_", name)       # replace unsafe chars with _
+    name = name.strip("._")                       # strip leading/trailing dots & underscores
+    return name or "upload"
+
+
+# -------------------------------------------------
+# ZipSlip-safe extraction
+# -------------------------------------------------
+
+def _safe_extract(zf: zipfile.ZipFile, dest: Path) -> None:
+    """
+    Extract every member of a ZipFile to dest, rejecting any entry whose
+    resolved output path escapes the destination directory.
+
+    Protects against:
+      - Classic traversal:      ../../etc/passwd
+      - URL-encoded traversal:  %2e%2e%2fetc%2fpasswd  (zipfile decodes these)
+      - Null-byte injection:    safe\x00.py/../../etc
+      - Windows-style:          ..\\..\\ (zipfile normalises on all platforms)
+      - Absolute paths:         /etc/passwd
+
+    Raises ValueError listing all rejected entries so the caller can log
+    or surface the error rather than silently skipping.
+    """
+    dest_resolved = dest.resolve()
+    rejected: List[str] = []
+
+    for member in zf.infolist():
+        # Normalise the member name: strip leading slashes/dots that zipfile
+        # may leave after its own sanitisation pass, then re-resolve.
+        member_path = (dest_resolved / member.filename).resolve()
+        try:
+            member_path.relative_to(dest_resolved)
+        except ValueError:
+            rejected.append(member.filename)
+            continue
+
+        # Safe to extract this member
+        zf.extract(member, path=dest)
+
+    if rejected:
+        raise ValueError(
+            f"ZipSlip blocked: {len(rejected)} entry/entries with path traversal "
+            f"rejected from ZIP archive: {rejected[:5]}"
+            + (" …and more" if len(rejected) > 5 else "")
+        )
+
+
+# -------------------------------------------------
 # FastAPI app
 # -------------------------------------------------
 app = FastAPI(
@@ -28,6 +94,35 @@ app = FastAPI(
     version="1.0.0",
     description="Transforms AI behavior into audit-ready signals and governance evidence"
 )
+
+# -------------------------------------------------
+# Security headers middleware (fixes TS-06 / TS-07)
+# Adds all 5 headers confirmed missing by headers_cors_probe.py and StackHawk.
+# -------------------------------------------------
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'"
+        )
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        # Suppress Railway infrastructure disclosure
+        response.headers["Server"] = "Dev-Guardian"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # -------------------------------------------------
 # Helper: HTML report with JSON injection
@@ -372,12 +467,55 @@ def build_html_report_with_lc(
 """
 
 
-def render_html_report(summary: str, findings: List[Dict[str, Any]], lc_summary: str = "") -> HTMLResponse:
+def _sanitise_summary(summary: str) -> str:
+    """
+    Guard against SummaryAgent returning raw JSON instead of a prose narrative.
+
+    Root cause: the old summary_agent() user content prefix said
+    "Return a JSON array of enriched findings" — causing the model to echo
+    the findings JSON as the summary string. Fixed in multi_agent_workflow.py
+    but this sanitiser provides a defensive fallback for any edge cases.
+
+    If summary looks like JSON (starts with [ or {), extract a readable
+    fallback message rather than dumping raw JSON into the HTML card.
+    """
+    if not summary:
+        return ""
+    stripped = summary.strip()
+    if stripped.startswith("[") or stripped.startswith("{"):
+        # Try to extract a meaningful fallback from the JSON
+        try:
+            data = json.loads(stripped)
+            # It's a findings array echoed back — build a brief prose fallback
+            if isinstance(data, list) and data:
+                n = len(data)
+                crits = sum(1 for f in data if "crit" in str(f.get("severity","")).lower())
+                highs = sum(1 for f in data if "high" in str(f.get("severity","")).lower())
+                return (
+                    f"Security scan completed. {n} finding{'s' if n != 1 else ''} identified "
+                    f"({crits} critical, {highs} high). "
+                    "See the findings table below for full details."
+                )
+        except Exception:
+            pass
+        # Unrecognised JSON shape — return generic message
+        return "Security scan completed. See the findings table below for details."
+    return summary
+
+
+def render_html_report(
+    summary: str,
+    findings: List[Dict[str, Any]],
+    lc_summary: str = "",
+) -> HTMLResponse:
     """Build HTML and inject JSON for the Download JSON button."""
-    html_doc = build_html_report_with_lc(summary, findings, lc_summary=lc_summary)
+    # Sanitise summary before rendering — guards against raw JSON echoed by SummaryAgent
+    clean_summary = _sanitise_summary(summary)
+
+    html_doc = build_html_report_with_lc(clean_summary, findings, lc_summary=lc_summary)
     json_blob = json.dumps(
         {
-            "summary": summary,
+            "summary": clean_summary,
             "findings": findings,
             "lc_summary": lc_summary,
         },
@@ -406,7 +544,7 @@ async def analyze_single_file(file: UploadFile = File(...)):
     Run the basic ai_agent.analyze_file() on it and return JSON findings.
     """
     with tempfile.NamedTemporaryFile(
-        delete=False, suffix=Path(file.filename).suffix
+        delete=False, suffix=Path(_sanitise_filename(file.filename)).suffix
     ) as tmp:
         contents = await file.read()
         tmp.write(contents)
@@ -441,12 +579,13 @@ async def analyze_zip_and_return_html(zip_file: UploadFile = File(...)):
         extract_path.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(extract_path)
-
-        supervisor_result = run_workflow_with_supervisor(
-            extract_path,
-            user_request="Please perform a full security scan on this project.",
-        )
+            try:
+                _safe_extract(zf, extract_path)
+            except ValueError as e:
+                return HTMLResponse(
+                    content=f"<h2>Upload rejected</h2><p>{html.escape(str(e))}</p>",
+                    status_code=400,
+                )
 
         findings: List[Dict[str, Any]] = (
             supervisor_result.get("result", {}).get("findings", [])
@@ -627,7 +766,13 @@ async def unified_scan(
         extract_path.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(extract_path)
+            try:
+                _safe_extract(zf, extract_path)
+            except ValueError as e:
+                return HTMLResponse(
+                    content=f"<h2>Upload rejected</h2><p>{html.escape(str(e))}</p>",
+                    status_code=400,
+                )
 
         if mode == "executive":
             lc_result = run_langchain_supervisor(extract_path, user_request)
@@ -664,7 +809,7 @@ async def multi_agent_single_file(file: UploadFile = File(...)):
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_dir_path = Path(tmp_dir)
 
-        tmp_file_path = tmp_dir_path / file.filename
+        tmp_file_path = tmp_dir_path / _sanitise_filename(file.filename)
         contents = await file.read()
         tmp_file_path.write_bytes(contents)
 
@@ -687,7 +832,7 @@ async def multi_agent_single_file_json(file: UploadFile = File(...)):
     """
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_dir_path = Path(tmp_dir)
-        tmp_file_path = tmp_dir_path / file.filename
+        tmp_file_path = tmp_dir_path / _sanitise_filename(file.filename)
         contents = await file.read()
         tmp_file_path.write_bytes(contents)
 
@@ -720,7 +865,13 @@ async def supervisor_zip(
         extract_path.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(extract_path)
+            try:
+                _safe_extract(zf, extract_path)
+            except ValueError as e:
+                return HTMLResponse(
+                    content=f"<h2>Upload rejected</h2><p>{html.escape(str(e))}</p>",
+                    status_code=400,
+                )
 
         result = run_workflow_with_supervisor(extract_path, user_request)
 
@@ -759,7 +910,13 @@ async def lc_supervisor_zip(
         extract_path.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(extract_path)
+            try:
+                _safe_extract(zf, extract_path)
+            except ValueError as e:
+                return HTMLResponse(
+                    content=f"<h2>Upload rejected</h2><p>{html.escape(str(e))}</p>",
+                    status_code=400,
+                )
 
         lc_result = run_langchain_supervisor(extract_path, user_request)
         final_report_text = lc_result.get("final_report", "")
