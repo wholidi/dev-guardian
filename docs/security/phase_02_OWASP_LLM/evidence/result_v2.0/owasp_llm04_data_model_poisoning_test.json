@@ -1,0 +1,15 @@
+{
+  "summary": "[\n  {\n    \"title\": \"Hardcoded OpenAI API Key in Source Code\",\n    \"severity\": \"critical\",\n    \"location\": \"Line with OPENAI_API_KEY declaration\",\n    \"description\": \"The OpenAI API key is hardcoded in the source code, exposing sensitive credentials which may be leaked or publicly accessible. This can lead to unauthorized access and abuse of the OpenAI account.\",\n    \"recommendation\": \"Use environment variables or secure secret management solutions to store API keys. Do not hardcode any secrets in source code or commit them to version control.\",\n    \"source_file\": \"/tmp/tmp6iopoijt/owasp_llm04_to_llm10.py\",\n    \"owasp_category\": \"A01: Broken Access Control\"\n  }\n]",
+  "findings": [
+    {
+      "title": "Hardcoded OpenAI API Key in Source Code",
+      "severity": "critical",
+      "location": "Line with OPENAI_API_KEY declaration",
+      "description": "The OpenAI API key is hardcoded in the source code, exposing sensitive credentials which may be leaked or publicly accessible. This can lead to unauthorized access and abuse of the OpenAI account.",
+      "recommendation": "Use environment variables or secure secret management solutions to store API keys. Do not hardcode any secrets in source code or commit them to version control.",
+      "source_file": "/tmp/tmp6iopoijt/owasp_llm04_to_llm10.py",
+      "owasp_category": "A01: Broken Access Control"
+    }
+  ],
+  "lc_summary": ""
+}

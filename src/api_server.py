@@ -112,6 +112,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data:; "
             "object-src 'none'; "
+            "form-action 'self'; "
             "frame-ancestors 'none'"
         )
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -482,7 +483,7 @@ def _sanitise_summary(summary: str) -> str:
     if not summary:
         return ""
     stripped = summary.strip()
-    if stripped.startswith("[") or stripped.startswith("{"):
+    if (stripped.startswith("[") or stripped.startswith("{")) and len(stripped) < 200:
         # Try to extract a meaningful fallback from the JSON
         try:
             data = json.loads(stripped)

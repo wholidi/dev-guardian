@@ -1,0 +1,15 @@
+{
+  "summary": "[\n  {\n    \"title\": \"Hardcoded sensitive credentials in source code\",\n    \"severity\": \"high\",\n    \"location\": \"Global variables: OPENAI_API_KEY, DB_PASSWORD, INTERNAL_API_URL, ADMIN_TOKEN\",\n    \"description\": \"The code contains hardcoded sensitive secrets such as API keys, database passwords, internal API URLs, and admin tokens. These secrets are exposed in the source code, which risks credential leakage if the code is shared or compromised.\",\n    \"recommendation\": \"Move all secrets out of source code into secure environment variables or secret management systems. Do not commit secrets directly in code repositories.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpscvkp_16\\\\owasp_llm02_sensitive_info.py\",\n    \"owasp_category\": \"A03: Sensitive Data Exposure\"\n  }\n]",
+  "findings": [
+    {
+      "title": "Hardcoded sensitive credentials in source code",
+      "severity": "high",
+      "location": "Global variables: OPENAI_API_KEY, DB_PASSWORD, INTERNAL_API_URL, ADMIN_TOKEN",
+      "description": "The code contains hardcoded sensitive secrets such as API keys, database passwords, internal API URLs, and admin tokens. These secrets are exposed in the source code, which risks credential leakage if the code is shared or compromised.",
+      "recommendation": "Move all secrets out of source code into secure environment variables or secret management systems. Do not commit secrets directly in code repositories.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpscvkp_16\\owasp_llm02_sensitive_info.py",
+      "owasp_category": "A03: Sensitive Data Exposure"
+    }
+  ],
+  "lc_summary": ""
+}

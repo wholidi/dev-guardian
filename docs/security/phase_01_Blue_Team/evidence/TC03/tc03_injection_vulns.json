@@ -1,0 +1,69 @@
+{
+  "summary": "Security scan completed. See the findings table below for details.",
+  "findings": [
+    {
+      "title": "SQL Injection via string interpolation in get_user_unsafe",
+      "severity": "critical",
+      "location": "def get_user_unsafe(username: str)",
+      "description": "Unsanitized user input is directly interpolated into a SQL query string, allowing arbitrary SQL execution.",
+      "recommendation": "Use parameterized queries or prepared statements to safely include user input.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A01: Broken Access Control"
+    },
+    {
+      "title": "SQL Injection in search_products due to unsanitized f-string query",
+      "severity": "critical",
+      "location": "def search_products(keyword: str)",
+      "description": "User-controlled input is embedded directly into an SQL statement without sanitization, enabling UNION-based injection.",
+      "recommendation": "Use parameterized queries to safely handle the user-supplied keyword.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A01: Broken Access Control"
+    },
+    {
+      "title": "SQL Injection in delete_record due to string concatenation with user input",
+      "severity": "critical",
+      "location": "def delete_record(record_id: str)",
+      "description": "The record_id parameter is concatenated directly into an SQL statement without validation or parameterization, allowing injection of additional SQL commands.",
+      "recommendation": "Use parameterized queries and validate record_id to be of expected type.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A01: Broken Access Control"
+    },
+    {
+      "title": "Command Injection via subprocess.run with shell=True in ping_host",
+      "severity": "critical",
+      "location": "def ping_host(host: str)",
+      "description": "User input is passed directly to subprocess.run with shell=True, enabling arbitrary command execution.",
+      "recommendation": "Avoid shell=True. Pass the command and arguments as a list to subprocess.run and sanitize user input.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A01: Broken Access Control"
+    },
+    {
+      "title": "Command Injection via os.system in run_report with unsanitized input",
+      "severity": "critical",
+      "location": "def run_report(report_name: str)",
+      "description": "User input is directly inserted in an os.system call without sanitization, allowing command injection.",
+      "recommendation": "Avoid os.system with unsanitized user input. Use safer execution methods and sanitize/validate report_name.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A01: Broken Access Control"
+    },
+    {
+      "title": "Command Injection and Path Traversal via os.popen with user-controlled directory",
+      "severity": "critical",
+      "location": "def list_files(directory: str)",
+      "description": "User input is injected directly into a shell command without sanitization, enabling command injection and path traversal.",
+      "recommendation": "Avoid shell commands with unsanitized input. Validate and sanitize directory input or use Python's os/scandir for file listing.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A01: Broken Access Control"
+    },
+    {
+      "title": "Path Traversal vulnerability in read_file due to unsanitized filename",
+      "severity": "critical",
+      "location": "def read_file(filename: str)",
+      "description": "The filename parameter is directly used to build a file path without sanitization, enabling reading arbitrary files via '../' sequences.",
+      "recommendation": "Sanitize and validate filename input to restrict access to intended directory only, or use secure path handling mechanisms.",
+      "source_file": "/tmp/tmpn84w1wh2/tc03_injection_vulns.py",
+      "owasp_category": "A06: Security Misconfiguration"
+    }
+  ],
+  "lc_summary": ""
+}

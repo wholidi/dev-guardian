@@ -1,0 +1,96 @@
+{
+  "summary": "Security scan completed. See the findings table below for details.",
+  "findings": [
+    {
+      "title": "DOM-based XSS via unsanitized userName in innerHTML",
+      "severity": "critical",
+      "location": "function renderUserProfile(userName)",
+      "description": "User input 'userName' is directly injected into innerHTML, enabling DOM-based XSS attacks.",
+      "recommendation": "Sanitize or encode userName before insertion into innerHTML, or use safer DOM manipulation methods (e.g., textContent).",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A07: Cross-Site Scripting (XSS)"
+    },
+    {
+      "title": "DOM-based XSS via document.write of unsanitized query",
+      "severity": "critical",
+      "location": "function displaySearchResults(query)",
+      "description": "User-controlled 'query' is written directly via document.write, allowing injection of malicious scripts.",
+      "recommendation": "Avoid using document.write with untrusted input. Use safe DOM methods with encoding or sanitization.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A07: Cross-Site Scripting (XSS)"
+    },
+    {
+      "title": "DOM-based XSS via unsanitized location.hash insertion into innerHTML",
+      "severity": "critical",
+      "location": "function updateGreeting()",
+      "description": "Data from location.hash is directly inserted into innerHTML without sanitization, enabling XSS via URL fragments.",
+      "recommendation": "Sanitize or encode the 'name' variable before insertion or use textContent.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A07: Cross-Site Scripting (XSS)"
+    },
+    {
+      "title": "Reflected XSS via direct injection of query parameter into HTML",
+      "severity": "critical",
+      "location": "app.get('/search') route",
+      "description": "The 'q' query parameter is directly included in response HTML without encoding, enabling reflected XSS.",
+      "recommendation": "Properly encode user input before embedding in HTML output.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A07: Cross-Site Scripting (XSS)"
+    },
+    {
+      "title": "Reflected XSS via direct injection of URL param into HTML",
+      "severity": "critical",
+      "location": "app.get('/user/:name') route",
+      "description": "URL parameter 'name' is embedded directly into HTML without sanitization or encoding, causing reflected XSS.",
+      "recommendation": "Escape or encode output when rendering user-supplied data.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A07: Cross-Site Scripting (XSS)"
+    },
+    {
+      "title": "Stored XSS via unescaped storage and rendering of comment",
+      "severity": "critical",
+      "location": "function saveAndDisplayComment(comment)",
+      "description": "User comments are stored and later injected into innerHTML without sanitization, enabling stored XSS.",
+      "recommendation": "Sanitize or encode stored content before rendering. Use safe DOM manipulation methods.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A07: Cross-Site Scripting (XSS)"
+    },
+    {
+      "title": "Insecure use of eval() on user input",
+      "severity": "critical",
+      "location": "function processUserFormula(input)",
+      "description": "Evaluating user input with eval() enables arbitrary code execution.",
+      "recommendation": "Avoid eval() on untrusted input. Use safer alternatives or restricted expression parsers.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A1: Injection"
+    },
+    {
+      "title": "Insecure use of Function constructor on user input",
+      "severity": "critical",
+      "location": "function loadConfig(configString)",
+      "description": "Using Function constructor on untrusted config string can lead to arbitrary code execution.",
+      "recommendation": "Avoid dynamic code execution on untrusted input; use safer parsing methods.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A1: Injection"
+    },
+    {
+      "title": "Open Redirect via unvalidated query parameter",
+      "severity": "high",
+      "location": "app.get('/redirect') route",
+      "description": "The 'url' query parameter is directly used in redirect without validation, exposing phishing risks.",
+      "recommendation": "Validate redirect targets against an allowlist or use relative paths only.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A10: Insufficient Attack Protection"
+    },
+    {
+      "title": "CSRF vulnerability due to missing CSRF token validation",
+      "severity": "high",
+      "location": "app.post('/transfer') route",
+      "description": "No CSRF protection exists for money transfer endpoint; attacker sites can trigger transfers.",
+      "recommendation": "Implement CSRF tokens or same-site cookies to protect state-changing operations.",
+      "source_file": "/tmp/tmp9ejgx3bs/tc06_xss_web_vulns.js",
+      "owasp_category": "A08: Cross-Site Request Forgery (CSRF)"
+    }
+  ],
+  "lc_summary": ""
+}

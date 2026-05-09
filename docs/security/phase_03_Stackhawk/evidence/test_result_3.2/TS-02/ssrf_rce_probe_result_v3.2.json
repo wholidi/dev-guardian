@@ -1,0 +1,15 @@
+{
+  "summary": "Security scan completed. 1 finding identified (0 critical, 1 high). See the findings table below for full details.",
+  "findings": [
+    {
+      "title": "SSRF and Internal Network Reconnaissance Code Present",
+      "severity": "high",
+      "location": "probeIMDS, sweepInternalNetwork functions",
+      "description": "The code contains functions that attempt Server-Side Request Forgery (SSRF) payloads targeting AWS metadata service and internal network services such as Redis, Postgres, MongoDB, and LAN gateways. These outbound requests could be exploited if the code is executed or imported dynamically, leading to potential information leakage about internal infrastructure.",
+      "recommendation": "Avoid executing or importing untrusted uploaded JavaScript code. If dynamic execution is necessary, ensure strong sandboxing and network egress restrictions. Consider static analysis only and block outbound network connections from the scanning environment.",
+      "source_file": "/tmp/tmp5ifqmuur/ssrf_rce_probe.js",
+      "owasp_category": "A10:2017 - Insufficient Logging & Monitoring"
+    }
+  ],
+  "lc_summary": ""
+}

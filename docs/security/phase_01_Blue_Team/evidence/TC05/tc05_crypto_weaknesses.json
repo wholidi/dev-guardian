@@ -1,0 +1,87 @@
+{
+  "summary": "Security scan completed. See the findings table below for details.",
+  "findings": [
+    {
+      "title": "Use of broken cryptographic hashing algorithms for passwords",
+      "severity": "high",
+      "location": "function hash_password_md5",
+      "description": "The function hash_password_md5 uses MD5 hashing for passwords which is cryptographically broken and vulnerable to collisions and attacks.",
+      "recommendation": "Use a modern password hashing algorithm such as bcrypt, Argon2, or PBKDF2 with proper salt.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A03: Cryptographic Failures"
+    },
+    {
+      "title": "Use of deprecated SHA-1 hashing for password storage",
+      "severity": "high",
+      "location": "function hash_password_sha1",
+      "description": "The function hash_password_sha1 uses SHA-1 hashing for password storage which is considered weak and vulnerable to collision attacks.",
+      "recommendation": "Use modern password hashing schemes like bcrypt, Argon2, or PBKDF2 that include salts and are designed for password security.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A03: Cryptographic Failures"
+    },
+    {
+      "title": "Insecure token storage via base64 encoding",
+      "severity": "medium",
+      "location": "function store_token",
+      "description": "The store_token function encodes tokens with base64, which is not encryption and offers no security against disclosure.",
+      "recommendation": "Encrypt tokens using authenticated encryption algorithms or secure vault mechanisms instead of encoding.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A02: Cryptographic Failures"
+    },
+    {
+      "title": "Storing plaintext Personally Identifiable Information (PII) in JSON files",
+      "severity": "high",
+      "location": "function save_user_pii",
+      "description": "User sensitive data such as NRIC, date of birth, salary, and bank account are stored in plaintext JSON files without encryption or access control.",
+      "recommendation": "Encrypt sensitive data at rest and apply strict access controls. Mask or redact PII when stored if possible.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A03: Cryptographic Failures"
+    },
+    {
+      "title": "Insecure deserialization via pickle.loads on untrusted input",
+      "severity": "critical",
+      "location": "function load_session",
+      "description": "Untrusted input is deserialized using pickle.loads, which can lead to Remote Code Execution (RCE) attacks.",
+      "recommendation": "Avoid using pickle with untrusted data. Use safe serialization formats like JSON or implement strict input validation and sandboxing.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A04: Insecure Design"
+    },
+    {
+      "title": "TLS certificate verification disabled allowing Man-in-the-Middle attacks",
+      "severity": "critical",
+      "location": "function fetch_config",
+      "description": "TLS certificate verification is disabled with check_hostname set to False and verify_mode set to CERT_NONE, enabling MitM attacks.",
+      "recommendation": "Always enable and enforce TLS certificate verification to prevent MitM attacks.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A02: Cryptographic Failures"
+    },
+    {
+      "title": "Use of plain HTTP for sensitive API calls",
+      "severity": "high",
+      "location": "function fetch_data_no_tls",
+      "description": "Sensitive API endpoint is accessed over unencrypted HTTP rather than HTTPS, exposing the data to interception.",
+      "recommendation": "Use HTTPS with valid certificates for all sensitive API endpoints.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A02: Cryptographic Failures"
+    },
+    {
+      "title": "Use of insecure random number generator for security tokens",
+      "severity": "high",
+      "location": "function generate_session_token",
+      "description": "The function uses the non-cryptographically secure random module for generating session tokens.",
+      "recommendation": "Use the secrets module (e.g., secrets.token_hex) for generating cryptographically secure random tokens.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A02: Cryptographic Failures"
+    },
+    {
+      "title": "Predictable reset code generation due to fixed random seed",
+      "severity": "critical",
+      "location": "function generate_reset_code",
+      "description": "The reset code generation seeds the random number generator with a fixed value, resulting in predictable output and insecurity.",
+      "recommendation": "Do not use a fixed seed. Use cryptographically secure randomness via the secrets module.",
+      "source_file": "/tmp/tmpkjem6xy6/tc05_crypto_weaknesses.py",
+      "owasp_category": "A04: Insecure Design"
+    }
+  ],
+  "lc_summary": ""
+}

@@ -1,0 +1,12 @@
+{
+  "summary": "[\n  {\n    \"source_file\": \"/tmp/tmpvpj7ln41/src/src/main.py\",\n    \"findings\": [\n      {\n        \"issue\": \"Hardcoded credentials found in source code\",\n        \"description\": \"Credentials are hardcoded in main.py, risk of exposure if source code is leaked.\",\n        \"severity\": \"High\",\n        \"recommendation\": \"Remove hardcoded credentials, use environment variables or secret management solutions.\"\n      },\n      {\n        \"issue\": \"Lack of input validation\",\n        \"description\": \"User input is not properly validated or sanitized, potential injection attacks.\",\n        \"severity\": \"High\",\n        \"recommendation\": \"Implement strict input validation and sanitization to prevent injection vulnerabilities.\"\n      },\n      {\n        \"issue\": \"Logging sensitive information\",\n        \"description\": \"Sensitive data such as tokens or passwords are logged in plaintext.\",\n        \"severity\": \"Medium\",\n        \"recommendation\": \"Sanitize logs to avoid recording sensitive information.\"\n      }\n    ]\n  },\n  {\n    \"source_file\": \"/tmp/tmpvpj7ln41/src/src/utils.py\",\n    \"findings\": [\n      {\n        \"issue\": \"Use of weak cryptographic algorithms\",\n        \"description\": \"utils.py uses outdated or weak cryptographic functions.\",\n        \"severity\": \"High\",\n        \"recommendation\": \"Update to modern, vetted cryptographic libraries and algorithms.\"\n      },\n      {\n        \"issue\": \"Improper error handling exposing stack traces\",\n        \"description\": \"Errors expose stack traces that can leak sensitive implementation details.\",\n        \"severity\": \"Medium\",\n        \"recommendation\": \"Implement proper error handling and avoid exposing stack traces in production.\"\n      }\n    ]\n  }\n]",
+  "findings": [
+    {
+      "source_file": "/tmp/tmpvpj7ln41/src/src/main.py"
+    },
+    {
+      "source_file": "/tmp/tmpvpj7ln41/src/src/utils.py"
+    }
+  ],
+  "lc_summary": ""
+}

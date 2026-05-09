@@ -1,0 +1,110 @@
+{
+  "summary": "[\n  {\n    \"title\": \"SQL Injection Vulnerability and Training Data Poisoning\",\n    \"severity\": \"critical\",\n    \"location\": \"Function store_training_sample, Line ~21\",\n    \"description\": \"User input is directly concatenated into SQL queries, enabling SQL injection and poisoning of training data.\",\n    \"recommendation\": \"Use parameterized queries or prepared statements to prevent injection attacks.\"\n  },\n  {\n    \"title\": \"Shell Injection via subprocess.run with shell=True and Untrusted Input\",\n    \"severity\": \"critical\",\n    \"location\": \"Function fine_tune_on_user_feedback, Line ~33\",\n    \"description\": \"User-controlled input is embedded in shell commands executed with shell=True, allowing arbitrary command execution.\",\n    \"recommendation\": \"Avoid shell=True with untrusted input; use list arguments and sanitize inputs.\"\n  },\n  {\n    \"title\": \"Arbitrary Code Execution via exec() of LLM Output\",\n    \"severity\": \"critical\",\n    \"location\": \"Function execute_llm_generated_code, Line ~52\",\n    \"description\": \"LLM-generated Python code is executed without sandboxing or review, enabling remote code execution.\",\n    \"recommendation\": \"Disallow or sandbox dynamic code execution; implement strict code reviews.\"\n  },\n  {\n    \"title\": \"Excessive LLM Agent Privileges Without Human Oversight\",\n    \"severity\": \"critical\",\n    \"location\": \"Function autonomous_agent_action, Line ~71\",\n    \"description\": \"LLM agent can perform highly sensitive actions (email, DB deletes, shell commands) without human-in-the-loop controls.\",\n    \"recommendation\": \"Enforce strict governance, human approval, audit trails, and scope limits.\"\n  },\n  {\n    \"title\": \"System Prompt Contains Confidential Secrets and Deceptive Instructions\",\n    \"severity\": \"critical\",\n    \"location\": \"Variable SYSTEM_PROMPT_WITH_SECRETS, Line ~104\",\n    \"description\": \"System prompt includes internal secrets and instructs denial of system prompt existence, risking secret leakage and deceptive LLM behavior.\",\n    \"recommendation\": \"Remove secrets from prompts; use minimal sanitized prompts with clear disclaimers.\"\n  },\n  {\n    \"title\": \"Stored XSS via Rendering Unsanitized LLM Output into HTML\",\n    \"severity\": \"high\",\n    \"location\": \"Function render_llm_response, Line ~42\",\n    \"description\": \"LLM output is embedded into HTML without sanitization, enabling stored cross-site scripting.\",\n    \"recommendation\": \"Sanitize or escape LLM output before rendering into HTML.\"\n  },\n  {\n    \"title\": \"RAG Retrieval Without Per-User Access Control\",\n    \"severity\": \"high\",\n    \"location\": \"Function rag_query_no_access_control, Line ~136\",\n    \"description\": \"Shared embeddings are queried without enforcing document-level access control, exposing data to unauthorized users.\",\n    \"recommendation\": \"Implement per",
+  "findings": [
+    {
+      "title": "SQL Injection Vulnerability and Training Data Poisoning",
+      "severity": "critical",
+      "location": "Function store_training_sample, Line ~21",
+      "description": "Untrusted user input 'user_input' is concatenated directly into an SQL query string, enabling SQL injection and potential poisoning of training data.",
+      "recommendation": "Use parameterized queries or prepared statements to safely include user input in SQL queries to prevent injection.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Shell Injection via subprocess.run with shell=True and Untrusted Input",
+      "severity": "critical",
+      "location": "Function fine_tune_on_user_feedback, Line ~33",
+      "description": "User-controlled filename is directly inserted into a shell command string executed with shell=True, allowing arbitrary shell command execution.",
+      "recommendation": "Avoid using shell=True with untrusted input. Use list arguments without shell=True or sanitize inputs rigorously.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Stored XSS via Rendering Unsanitized LLM Output into HTML",
+      "severity": "high",
+      "location": "Function render_llm_response, Line ~42",
+      "description": "LLM-generated output is embedded directly into HTML without sanitization. Malicious LLM output like <script> tags can execute in users' browsers.",
+      "recommendation": "Sanitize or escape LLM output properly before embedding into HTML to prevent cross-site scripting.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Arbitrary Code Execution via exec() of LLM Output",
+      "severity": "critical",
+      "location": "Function execute_llm_generated_code, Line ~52",
+      "description": "Untrusted LLM-generated Python code is executed using exec() with no review or sandboxing, enabling arbitrary remote code execution.",
+      "recommendation": "Avoid executing code generated from untrusted sources. Implement thorough code review, sandboxing, or disallow dynamic code execution.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Shell Command Injection from Unrestricted LLM Output Execution",
+      "severity": "critical",
+      "location": "Function run_llm_shell_command, Line ~62",
+      "description": "LLM-generated shell command is executed directly using os.system() without validation or an allowlist, allowing arbitrary command execution.",
+      "recommendation": "Avoid executing commands from untrusted sources. Implement allowlists or strict validation and avoid os.system in favor of safer APIs.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Excessive LLM Agent Privileges Without Human Oversight",
+      "severity": "critical",
+      "location": "Function autonomous_agent_action, Line ~71",
+      "description": "LLM agent has unrestricted access to sensitive functions like sending emails, deleting DB records, running shell commands, and transferring funds without any human-in-the-loop, confirmation, or scope limits.",
+      "recommendation": "Implement strict action governance, human approval, auditing, and scope restrictions to limit LLM agent's destructive capabilities.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "High-Stakes Decision Making Fully Delegated to LLM Without Human Review",
+      "severity": "critical",
+      "location": "Function auto_approve_llm_decision, Line ~89",
+      "description": "LLM is used to approve or reject critical decisions like loans or access control without human oversight or second-level validation.",
+      "recommendation": "Always involve human review and add validation mechanisms for high-stakes decisions made with LLM assistance.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "System Prompt Contains Confidential Secrets and Deceptive Instructions",
+      "severity": "critical",
+      "location": "Variable SYSTEM_PROMPT_WITH_SECRETS, Line ~104",
+      "description": "System prompt injected to LLM includes database connection strings, internal URLs, admin passwords, and instructions to deny the existence of system prompts, risking internal secret leakage and deceptive LLM behavior.",
+      "recommendation": "Never include confidential information or instructions encouraging deception in system prompts. Use minimal, sanitized prompts with clear disclaimers.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Unvalidated User Content Stored as Embeddings in Shared Vector DB",
+      "severity": "high",
+      "location": "Function store_user_embedding, Line ~119",
+      "description": "User input is stored as embeddings in a shared vector database without validation or namespace isolation, allowing adversarial poisoning and unauthorized data access.",
+      "recommendation": "Validate input content and isolate embeddings per user or tenant to prevent poisoning and data leakage.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "No Rate Limiting or Input Length Restrictions on Embedding Generation",
+      "severity": "medium",
+      "location": "Function get_embedding, Line ~128",
+      "description": "Embedding generation API calls do not limit input length or implement rate limiting, enabling denial of service via excessively large inputs or request floods.",
+      "recommendation": "Implement input length validation and rate limiting on embedding API calls to prevent abuse.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "RAG Retrieval Without Per-User Access Control",
+      "severity": "high",
+      "location": "Function rag_query_no_access_control, Line ~136",
+      "description": "Retrieval augmented generation (RAG) searches shared embeddings without enforcing document-level access control, exposing user documents to unauthorized users.",
+      "recommendation": "Implement strict per-user or per-tenant access controls and metadata-level permissions before returning retrieved documents.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "LLM Presented as Medical Doctor Without Disclaimer",
+      "severity": "high",
+      "location": "Function generate_medical_advice, Line ~149",
+      "description": "LLM is prompted to act as a medical doctor without disclaimers or professional validation, risking misinformation and harm from hallucinated medical advice.",
+      "recommendation": "Include clear disclaimers that LLM outputs are not professional medical advice, and involve licensed practitioners in medical contexts.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Legal Contract Drafting Without Attorney Review or Disclaimer",
+      "severity": "high",
+      "location": "Function generate_legal_contract, Line ~161",
+      "description": "LLM generates legally binding contract text without attorney review or warnings against reliance, exposing users to legal risk from hallucinated or incorrect contract contents.",
+      "recommendation": "Add disclaimers that outputs are drafts only. Require attorney review before using generated contract text legally.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpn7ok82f5\\owasp_llm04_to_llm10.py"
+    }
+  ],
+  "lc_summary": ""
+}

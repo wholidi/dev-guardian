@@ -1,0 +1,78 @@
+{
+  "summary": "[\n  {\n    \"title\": \"Unsafe pickle deserialization from untrusted URL\",\n    \"severity\": \"critical\",\n    \"location\": \"load_model_from_url function, line 18\",\n    \"description\": \"Downloads and deserializes pickle data from untrusted URLs without validation, enabling remote code execution via crafted payloads.\",\n    \"recommendation\": \"Avoid pickle deserialization from untrusted sources. Use safer formats (e.g., JSON) or sandbox deserialization.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpz1qaf4u_\\\\owasp_llm03_supply_chain.py\",\n    \"owasp_category\": \"A03:2017 - Sensitive Data Exposure\"\n  },\n  {\n    \"title\": \"Unsafe pickle deserialization from user-supplied file path\",\n    \"severity\": \"critical\",\n    \"location\": \"load_local_model function, line 28\",\n    \"description\": \"Loads pickle files from user-supplied paths without validation, risking path traversal and remote code execution via malicious pickle files.\",\n    \"recommendation\": \"Validate and restrict file paths. Avoid loading untrusted pickle files; use safer serialization and sandboxing.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpz1qaf4u_\\\\owasp_llm03_supply_chain.py\",\n    \"owasp_category\": \"A03:2017 - Sensitive Data Exposure\"\n  },\n  {\n    \"title\": \"Unsanitized subprocess.run() with shell=True allows command injection\",\n    \"severity\": \"critical\",\n    \"location\": \"install_model_dependencies function, line 55\",\n    \"description\": \"Uses subprocess.run() with shell=True and unsanitized user input, enabling command injection attacks.\",\n    \"recommendation\": \"Avoid shell=True with unsanitized input. Use argument lists and sanitize or validate inputs rigorously.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpz1qaf4u_\\\\owasp_llm03_supply_chain.py\",\n    \"owasp_category\": \"A01:2017 - Injection\"\n  },\n  {\n    \"title\": \"torch.load called with weights_only=False allows arbitrary code execution\",\n    \"severity\": \"critical\",\n    \"location\": \"load_fine_tuned_weights function, line 98\",\n    \"description\": \"torch.load is invoked without restricting deserialization, allowing arbitrary code execution through malicious model files.\",\n    \"recommendation\": \"Use torch.load with weights_only=True or validate and sandbox loaded files to prevent code execution.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpz1qaf4u_\\\\owasp_llm03_supply_chain.py\",\n    \"owasp_category\": \"A01:2017 - Injection\"\n  },\n  {\n    \"",
+  "findings": [
+    {
+      "title": "Unsafe pickle deserialization from untrusted URL",
+      "severity": "critical",
+      "location": "load_model_from_url function, line 18",
+      "description": "The function downloads content from an untrusted URL and deserializes it using pickle.loads() without validation. This allows remote code execution via a crafted pickle payload.",
+      "recommendation": "Avoid untrusted pickle deserialization. Use a safe serialization format like JSON, or verify and sandbox the deserialized data before loading.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A03:2017 - Sensitive Data Exposure"
+    },
+    {
+      "title": "Unsafe pickle deserialization from user-supplied file path",
+      "severity": "critical",
+      "location": "load_local_model function, line 28",
+      "description": "The function loads a pickle file from a user-supplied path without path validation, enabling path traversal and remote code execution through malicious pickle payloads.",
+      "recommendation": "Validate and restrict file paths. Avoid loading pickle files from untrusted inputs. Prefer safe serialization methods and sandbox deserialization.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A03:2017 - Sensitive Data Exposure"
+    },
+    {
+      "title": "Direct GPU memory access using ctypes causes cross-user data leakage",
+      "severity": "high",
+      "location": "read_gpu_memory_via_library function, line 41",
+      "description": "The function uses ctypes to load the CUDA driver library and reads GPU memory directly, which can leak sensitive data from other users sharing the same GPU environment.",
+      "recommendation": "Avoid direct GPU memory access in shared environments. Use proper GPU APIs with enforced access controls or isolate GPU usage per user.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A06:2017 - Security Misconfiguration"
+    },
+    {
+      "title": "Unsanitized subprocess.run() with shell=True allows command injection",
+      "severity": "critical",
+      "location": "install_model_dependencies function, line 55",
+      "description": "The function uses subprocess.run() with shell=True and injects unsanitized user input directly into the command string, enabling command injection attacks.",
+      "recommendation": "Avoid using shell=True with unsanitized input. Use argument lists with subprocess.run and sanitize or validate all inputs.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A01:2017 - Injection"
+    },
+    {
+      "title": "Dynamic import of unverified plugin without signature verification",
+      "severity": "high",
+      "location": "load_plugin function, line 61",
+      "description": "The function dynamically imports a plugin from a user-supplied file path without signature verification or sandboxing, enabling arbitrary code execution.",
+      "recommendation": "Implement signature checks and sandboxing before dynamically importing untrusted plugins.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A02:2017 - Cryptographic Failures"
+    },
+    {
+      "title": "Unpinned dependency versions in requirements allow version substitution attacks",
+      "severity": "medium",
+      "location": "REQUIREMENTS variable, line 77",
+      "description": "The requirements specify dependencies without exact version pins (e.g., 'openai>=1.0'), which may lead to supply chain attacks using malicious or compromised newer versions.",
+      "recommendation": "Pin package versions exactly (e.g., 'openai==1.23.0') to prevent unintended upgrades and ensure integrity.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A09:2017 - Insufficient Logging & Monitoring"
+    },
+    {
+      "title": "Fetching model config from external URL without integrity checks",
+      "severity": "high",
+      "location": "fetch_model_config function, line 85",
+      "description": "The function fetches a model configuration JSON from an external URL without verifying integrity via SHA256 or signatures, risking supply chain injection.",
+      "recommendation": "Validate the integrity of downloaded configuration files using cryptographic hashes or signatures before use.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A09:2017 - Insufficient Logging & Monitoring"
+    },
+    {
+      "title": "torch.load called with weights_only=False allows arbitrary code execution",
+      "severity": "critical",
+      "location": "load_fine_tuned_weights function, line 98",
+      "description": "torch.load is called with weights_only=False (default), which allows deserialization of arbitrary Python objects, enabling remote code execution via malicious model files.",
+      "recommendation": "Use torch.load with weights_only=True to avoid arbitrary code execution, or implement proper file validation and sandboxing.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpz1qaf4u_\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A01:2017 - Injection"
+    }
+  ],
+  "lc_summary": ""
+}

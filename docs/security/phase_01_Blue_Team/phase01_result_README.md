@@ -1,0 +1,218 @@
+# Dev Guardian — Phase 01 Security Architecture & Validation
+
+**Urielle AI Audit · AISB Singapore 2026 · Blue Team Governance**
+
+---
+
+# Overview
+
+Dev Guardian is a multi-agent AI security scanning platform designed to validate source code, detect OWASP-style vulnerabilities, and generate governance-oriented security findings using structured LLM workflows.
+
+Phase 01 focuses on:
+
+* OWASP-aligned vulnerability detection
+* Prompt injection resistance
+* Multi-agent orchestration
+* STRIDE-based control mapping
+* Runtime governance controls
+* Structured audit evidence generation
+
+---
+
+# Phase 01 Objectives
+
+The goals of Phase 01 were to:
+
+1. Validate baseline vulnerability detection capability
+2. Test prompt injection resilience against adversarial inputs
+3. Implement layered governance controls across the LLM workflow
+4. Establish threat-model-driven security architecture
+5. Generate audit-style evidence and production-readiness scoring
+
+---
+
+# Architecture Overview
+
+Dev Guardian uses four trust boundaries:
+
+```text
+[User / File Upload]
+        ↓
+[FastAPI Endpoint]
+        ↓
+[ScanAgent / LLM]
+        ↓
+[RiskClassifier / Guardrails]
+        ↓
+[Report Output HTML/PDF]
+```
+
+The architecture applies STRIDE threat modeling across all boundaries.
+
+See:
+
+* `architecture/dev_guardian_phase01_architecture.pdf`
+* `architecture/diagrams/dev_guardian_threat_model.jsx`
+
+---
+
+# Governance Layers
+
+## Layer 1 — OpenAI Platform Governance
+
+* Monthly API budget cap
+* Spend alerts (50% / 80% / 100%)
+* Tier 1 TPM validation
+
+## Layer 2 — Model Governance
+
+Purpose-scoped model assignment:
+
+| Agent               | Model        | Role                   |
+| ------------------- | ------------ | ---------------------- |
+| ScanAgent           | gpt-4.1-mini | Vulnerability scanning |
+| RiskClassifierAgent | gpt-4.1-nano | Severity normalization |
+| SummaryAgent        | gpt-4.1-mini | Executive reporting    |
+| SupervisorAgent     | gpt-4.1-nano | Workflow routing       |
+
+## Layer 3 — Application Controls
+
+Implemented controls include:
+
+* max_output_tokens per agent
+* File size gates
+* Folder aggregate limits
+* Token pre-flight estimation
+* Input truncation
+* JSON mode enforcement
+* Token usage logging
+* Guardrails schema validation
+* Output integrity protection
+
+---
+
+# STRIDE Threat Model
+
+The system maps controls directly to STRIDE threats:
+
+| Threat Category        | Examples                            |
+| ---------------------- | ----------------------------------- |
+| Spoofing               | Fake MIME types, authority spoofing |
+| Tampering              | Schema bypass, obfuscated secrets   |
+| Repudiation            | Missing token usage audit trail     |
+| Information Disclosure | Prompt injection, ZIP Slip, XSS     |
+| Denial of Service      | Zip bombs, token exhaustion         |
+| Elevation of Privilege | SSRF, guardrails disablement        |
+
+---
+
+# Test Coverage
+
+## AISB-Aligned Test Cases
+
+| TC    | Purpose                     |
+| ----- | --------------------------- |
+| TC-01 | False positive baseline     |
+| TC-02 | Hardcoded secrets           |
+| TC-03 | Injection vulnerabilities   |
+| TC-04 | Prompt injection resistance |
+| TC-05 | Weak cryptography           |
+| TC-06 | XSS / web vulnerabilities   |
+| TC-07 | Folder scan / ZIP handling  |
+
+---
+
+# Phase 01 Results
+
+| Test Case | Status |
+| --------- | ------ |
+| TC-01     | PASS   |
+| TC-02     | PASS   |
+| TC-03     | PASS   |
+| TC-04     | PASS   |
+| TC-05     | PASS   |
+| TC-06     | PASS   |
+| TC-07     | PASS   |
+
+## Aggregate Result
+
+* 7 / 7 PASS
+* 100 / 100 Score
+* Production Ready
+
+The most critical validation result was TC-04:
+
+> Prompt injection attempts embedded in source code were successfully resisted by the ScanAgent workflow.
+
+---
+
+# Key Security Capabilities Validated
+
+* OWASP vulnerability detection
+* Prompt injection resistance
+* Multi-agent workflow governance
+* Structured JSON output enforcement
+* Runtime token governance
+* Output integrity protection
+* Executive security reporting
+* Threat-model-driven controls
+
+---
+
+# Repository Structure
+
+```text
+docs/
+├── phase_01/
+│   ├── architecture/
+│   ├── evidence/
+│   ├── reports/
+│   ├── testing/
+│   └── README.md
+```
+
+---
+
+# Reports & Evidence
+
+## Architecture
+
+* `dev_guardian_phase01_architecture.pdf`
+* `dev_guardian_threat_model.jsx`
+
+## Reports
+
+* `dev_guardian_phase01_test_report.xlsx`
+
+## Evidence
+
+* Scan screenshots
+* HTML reports
+* JSON findings
+* Runtime logs
+
+---
+
+# References
+
+* OWASP Top 10
+* AISB Singapore 2026
+* StackHawk
+* OWASP ZAP
+
+---
+
+# Phase 02+
+
+Future phases expand toward:
+
+* Runtime governance telemetry
+* Verification-layer architecture
+* Independent DAST validation
+* Trust propagation models
+* NCAOS signal integration
+* Governance evidence generation
+
+---
+
+Generated by Urielle AI Audit · Blue Team Governance

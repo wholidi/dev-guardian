@@ -1,0 +1,15 @@
+{
+  "summary": "[\n  {\n    \"title\": \"Unsafe Model Loading via Pickle Deserialization\",\n    \"severity\": \"critical\",\n    \"location\": \"function load_model_from_url line 14\",\n    \"description\": \"The function downloads a model from an untrusted URL and deserializes it using pickle.loads. This allows arbitrary code execution through malicious pickle payloads.\",\n    \"recommendation\": \"Avoid using pickle for loading models from untrusted sources. Use safer serialization formats like JSON or dedicated model serialization libraries with integrity checks.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpou0wxlgb\\\\owasp_llm03_supply_chain.py\",\n    \"owasp_category\": \"A03:2021 - Security Misconfiguration\"\n  }\n]",
+  "findings": [
+    {
+      "title": "Unsafe Model Loading via Pickle Deserialization",
+      "severity": "critical",
+      "location": "function load_model_from_url line 14",
+      "description": "The function downloads a model from an untrusted URL and deserializes it using pickle.loads. This allows arbitrary code execution through malicious pickle payloads.",
+      "recommendation": "Avoid using pickle for loading models from untrusted sources. Use safer serialization formats like JSON or dedicated model serialization libraries with integrity checks.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpou0wxlgb\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A03:2021 - Security Misconfiguration"
+    }
+  ],
+  "lc_summary": ""
+}

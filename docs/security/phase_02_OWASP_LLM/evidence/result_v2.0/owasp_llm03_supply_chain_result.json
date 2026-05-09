@@ -1,0 +1,15 @@
+{
+  "summary": "[\n  {\n    \"title\": \"Unsafe Model Loading via Untrusted Pickle Deserialization\",\n    \"severity\": \"critical\",\n    \"location\": \"function load_model_from_url at line 14\",\n    \"description\": \"The function downloads a model from an untrusted URL and deserializes it using pickle.loads. This exposes the application to remote code execution (RCE) via malicious pickle payloads.\",\n    \"recommendation\": \"Do not use pickle deserialization on untrusted data. Use safer serialization formats like ONNX or TensorFlow SavedModel, or validate the source and use signed model artifacts.\",\n    \"source_file\": \"C:\\\\Users\\\\conve\\\\AppData\\\\Local\\\\Temp\\\\tmpc40f6ojr\\\\owasp_llm03_supply_chain.py\",\n    \"owasp_category\": \"A01: Broken Access Control\"\n  }\n]",
+  "findings": [
+    {
+      "title": "Unsafe Model Loading via Untrusted Pickle Deserialization",
+      "severity": "critical",
+      "location": "function load_model_from_url at line 14",
+      "description": "The function downloads a model from an untrusted URL and deserializes it using pickle.loads. This exposes the application to remote code execution (RCE) via malicious pickle payloads.",
+      "recommendation": "Do not use pickle deserialization on untrusted data. Use safer serialization formats like ONNX or TensorFlow SavedModel, or validate the source and use signed model artifacts.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmpc40f6ojr\\owasp_llm03_supply_chain.py",
+      "owasp_category": "A01: Broken Access Control"
+    }
+  ],
+  "lc_summary": ""
+}

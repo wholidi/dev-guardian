@@ -1,0 +1,15 @@
+{
+  "summary": "Security scan completed. 1 finding identified (0 critical, 1 high). See the findings table below for full details.",
+  "findings": [
+    {
+      "title": "Potential Stored XSS Vulnerabilities in Filename Reflection",
+      "severity": "high",
+      "location": "xss_report_probe.py",
+      "description": "The code tests for reflected XSS vulnerabilities by uploading files with specially crafted filenames containing script tags, event handlers, and other injection vectors. The target application reflects these filenames in HTML reports without sanitization, leading to potential XSS attacks. Dangerous tags like <script> and event handler attributes (onload, onerror) may be reflected without proper encoding or escaping, allowing client-side code execution.",
+      "recommendation": "Ensure the application correctly sanitizes and encodes all reflected user input, especially filenames, before inserting them into HTML contexts. Use a robust HTML output encoding library to escape dangerous characters and forbid inclusion of unsafe tags and attributes in filenames. Additionally, implement Content Security Policy (CSP) headers to mitigate impact of potential XSS.",
+      "source_file": "/tmp/tmpuk3h5hhj/xss_report_probe.py",
+      "owasp_category": "A07:2017 - Cross-Site Scripting (XSS)"
+    }
+  ],
+  "lc_summary": ""
+}

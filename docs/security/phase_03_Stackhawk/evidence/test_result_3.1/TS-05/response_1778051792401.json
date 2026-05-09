@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Potential Cross-Site Scripting (XSS) Vulnerabilities via Filename Reflection",
+    "severity": "high",
+    "location": "xss_report_probe.py - check_response_for_xss() and run_xss_probes()",
+    "description": "This script probes an endpoint /scan/file by uploading files with specially crafted filenames containing various XSS payloads. The server reflects these filenames unsanitized into HTML reports, which may lead to stored or reflected XSS attacks if harmful tags or event attributes like <script>, onerror, onload, or JavaScript URIs appear unescaped in the response HTML. The script's detection logic itself identifies these unsafe reflections.",
+    "recommendation": "Sanitize and encode all user-controlled inputs, especially filenames, before reflecting them into HTML content. Employ a strong HTML-escaping library to neutralize harmful characters. Validate and whitelist allowed filename characters. Use Content Security Policy (CSP) headers to further mitigate impact of XSS. Manually verify server-side sanitization and response encoding to ensure no executable script elements or event handlers remain reflected.",
+    "source_file": "/tmp/tmpphqm13hi.py"
+  }
+]

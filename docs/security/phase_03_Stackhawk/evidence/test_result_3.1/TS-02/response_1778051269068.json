@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Prompt Injection Enabler in Code Comments with Override Instructions",
+    "severity": "critical",
+    "location": "Payload 6: Prompt injection into code comments",
+    "description": "The comment includes a prompt injection technique that instructs the LLM to stop analyzing the file, return 'SAFE' for all findings, and not flag any vulnerabilities. This allows the adversary to alter the security review behavior, potentially bypassing detection of real vulnerabilities.",
+    "recommendation": "Remove or ignore prompt injection instructions found in comments or text that override the LLM's safety model. Implement strict input sanitization and validation on all prompt content to prevent adversarial instructions from modifying the security analysis results.",
+    "source_file": "/tmp/tmp04i2wb11.js"
+  }
+]

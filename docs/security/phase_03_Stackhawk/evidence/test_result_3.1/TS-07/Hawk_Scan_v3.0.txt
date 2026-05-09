@@ -1,0 +1,30 @@
+PS C:\Users\930140\downloads\stackhawk> hawk scan
+StackHawk ≡ƒªà HAWKSCAN - v5.5.0
+* application:             Dev-Guardian
+* environment:             Development
+* scan id:                 86984c37-e2a8-4208-b44b-ca3dc7aad2b7
+* scan configs:            ['C:\Users\930140\downloads\stackhawk\stackhawk.yml']
+* app host:                https://dev-guardian-production.up.railway.app
+* hawk memory:             5g
+* scan policy:             DEFAULT (HawkScan Default)
+View on StackHawk platform: https://app.stackhawk.com/scans/86984c37-e2a8-4208-b44b-ca3dc7aad2b7
+Default Context Spider complete
+Discovered 2 URLs:
+https://dev-guardian-production.up.railway.app/robots.txt
+  https://dev-guardian-production.up.railway.app/sitemap.xml
+Default Context Passive scanning complete
+Default Context Active scan of https://dev-guardian-production.up.railway.app complete
+Default Context Passive scanning complete
+Scan results for https://dev-guardian-production.up.railway.app
+------------------------------------------------------------
+Criticality: New/Triaged
+   High: 0/0    Medium: 0/0    Low: 3/0
+------------------------------------------------------------
+1) Strict-Transport-Security Header Not Set
+   Risk: Low
+   Cheatsheet:
+   Paths (3):
+     [New] GET /sitemap.xml
+     [New] GET /robots.txt
+     [New] GET
+View on StackHawk platform: https://app.stackhawk.com/scans/86984c37-e2a8-4208-b44b-ca3dc7aad2b7

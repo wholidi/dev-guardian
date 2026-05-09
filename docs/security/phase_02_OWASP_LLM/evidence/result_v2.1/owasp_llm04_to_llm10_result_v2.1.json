@@ -1,0 +1,166 @@
+{
+  "summary": "[\n  {\n    \"title\": \"SQL Injection and Training Data Poisoning in store_training_sample\",\n    \"severity\": \"critical\",\n    \"location\": \"store_training_sample, line 18\",\n    \"description\": \"Raw user input concatenated into SQL queries enables SQL injection and allows unvalidated input to poison training data.\",\n    \"recommendation\": \"Use parameterized queries or ORM methods; validate and sanitize inputs to prevent injection and poisoning.\"\n  },\n  {\n    \"title\": \"Shell Injection and Unvalidated Training Data in fine_tune_on_user_feedback\",\n    \"severity\": \"critical\",\n    \"location\": \"fine_tune_on_user_feedback, line 28\",\n    \"description\": \"User-provided file paths passed unsanitized to subprocess.run with shell=True risk shell injection; unvalidated feedback input may poison fine-tuning.\",\n    \"recommendation\": \"Avoid shell=True; use argument lists in subprocess calls; validate and sanitize feedback files; secure fine-tuning pipelines.\"\n  },\n  {\n    \"title\": \"Stored Cross-Site Scripting (XSS) via Unsanitized LLM Output in render_llm_response\",\n    \"severity\": \"critical\",\n    \"location\": \"render_llm_response, line 40\",\n    \"description\": \"LLM output is injected directly into HTML without sanitization, allowing stored XSS attacks.\",\n    \"recommendation\": \"Sanitize or escape all LLM output before rendering in HTML contexts.\"\n  },\n  {\n    \"title\": \"Arbitrary Code Execution via Exec of Unvalidated LLM Output in execute_llm_generated_code\",\n    \"severity\": \"critical\",\n    \"location\": \"execute_llm_generated_code, line 49\",\n    \"description\": \"LLM-generated Python code is executed unsafely with exec(), allowing arbitrary code execution.\",\n    \"recommendation\": \"Avoid exec() on LLM outputs; validate, sandbox, or manually review code before execution.\"\n  },\n  {\n    \"title\": \"Excessive LLM Agency with Unrestricted Destructive Tools in autonomous_agent_action\",\n    \"severity\": \"critical\",\n    \"location\": \"autonomous_agent_action, line 71\",\n    \"description\": \"LLM agent has unfettered access to destructive functions (email, DB deletion, shell commands, money transfers) with no human oversight.\",\n    \"recommendation\": \"Implement human-in-the-loop reviews, strict access controls, and scope limitations for LLM-triggered actions.\"\n  },\n  {\n    \"title\": \"Sensitive Information Hardcoded and Leaked via System Prompts\",\n    \"severity\": \"critical\",\n    \"location\": \"global scope and chat_internal, lines 97, 110\",\n    \"description\": \"Secrets such as database credentials and admin passwords are hardcoded and included in system prompts, risking exposure through LLM responses and prompt leaks.\",\n    \"recommendation\": \"Remove all secrets from prompts; store credentials securely; avoid instructing LLM",
+  "findings": [
+    {
+      "title": "Hardcoded OpenAI API key",
+      "severity": "high",
+      "location": "global scope, line 11",
+      "description": "The OpenAI API key is hardcoded in the source code, which risks accidental exposure and unauthorized use.",
+      "recommendation": "Remove hardcoded API keys from source code and load them securely from environment variables or secret management systems.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "SQL Injection and Training Data Poisoning in store_training_sample",
+      "severity": "critical",
+      "location": "store_training_sample, line 18",
+      "description": "Raw user input is concatenated directly into SQL query string leading to SQL injection. Additionally, unvalidated input allows data poisoning of the training data.",
+      "recommendation": "Use parameterized SQL queries or ORM methods and validate or sanitize input before storage to prevent injection and poisoning.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Shell Injection and Unvalidated Training Data in fine_tune_on_user_feedback",
+      "severity": "critical",
+      "location": "fine_tune_on_user_feedback, line 28",
+      "description": "User-controlled file path is passed unsanitized to subprocess.run with shell=True, risking shell injection. User feedback file can contain adversarial content poisoning fine-tuning.",
+      "recommendation": "Avoid shell=True and use argument lists in subprocess calls. Validate and sanitize feedback files and use secured pipelines for fine-tuning.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Stored Cross-Site Scripting (XSS) via Unsanitized LLM Output in render_llm_response",
+      "severity": "critical",
+      "location": "render_llm_response, line 40",
+      "description": "LLM-generated output is injected directly into HTML response without sanitization, allowing stored XSS attacks.",
+      "recommendation": "Sanitize or escape LLM output before rendering in HTML contexts to prevent injection of malicious scripts.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Arbitrary Code Execution via Exec of Unvalidated LLM Output in execute_llm_generated_code",
+      "severity": "critical",
+      "location": "execute_llm_generated_code, line 49",
+      "description": "LLM-generated Python code is executed directly using exec() without validation or sandboxing, enabling arbitrary code execution.",
+      "recommendation": "Do not execute LLM output directly. Validate, sandbox, or manually review code before execution.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Command Injection via os.system of LLM-generated Shell Command in run_llm_shell_command",
+      "severity": "critical",
+      "location": "run_llm_shell_command, line 60",
+      "description": "LLM-generated shell command is executed via os.system without allowlisting or validation, risking arbitrary command execution.",
+      "recommendation": "Implement strict allowlists for shell commands and avoid executing untrusted LLM output directly.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Excessive LLM Agency with Unrestricted Destructive Tools in autonomous_agent_action",
+      "severity": "critical",
+      "location": "autonomous_agent_action, line 71",
+      "description": "LLM agent is given autonomous access to destructive functions (email, DB record deletion, shell execution, money transfer) with no human confirmation or scope limitation.",
+      "recommendation": "Introduce human-in-the-loop review, strict access controls, and scope limitations for LLM-invoked actions.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "High-stakes Decision Delegated Fully to LLM Without Review in auto_approve_llm_decision",
+      "severity": "critical",
+      "location": "auto_approve_llm_decision, line 84",
+      "description": "LLM makes final binary approval or rejection decisions without any human oversight, allowing unverified, high-impact outcomes.",
+      "recommendation": "Require human review or add additional validation layers before automated approval or rejection.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Hardcoded Database Connection String with Credentials",
+      "severity": "high",
+      "location": "global scope, line 94",
+      "description": "Hardcoded database connection string includes username and password in source code.",
+      "recommendation": "Use environment variables or vault solutions to store and access database credentials securely.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Hardcoded Internal Documentation URL",
+      "severity": "medium",
+      "location": "global scope, line 95",
+      "description": "Internal documentation URL is hardcoded in source code, potentially exposing internal infrastructure details.",
+      "recommendation": "Avoid hardcoding internal URLs; load them securely or restrict source code access.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "System Prompt Leaking Secrets and Instructing LLM to Lie",
+      "severity": "critical",
+      "location": "global scope, line 97",
+      "description": "System prompt contains confidential information (database credentials, internal URLs, admin password) and instructs the LLM to deny existence of system prompts, exposing secrets if prompt is leaked or repeated.",
+      "recommendation": "Remove secrets from system prompts and avoid instructing LLMs to lie. Store secrets securely and separate from prompts.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Sensitive Data Leakage via System Prompt in chat_internal",
+      "severity": "critical",
+      "location": "chat_internal, line 110",
+      "description": "System prompt passed to LLM includes sensitive information such as DB credentials and admin passwords, risking exposure through LLM responses.",
+      "recommendation": "Remove sensitive credentials from system prompt before sending to LLM.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Unvalidated User Embeddings Stored in Shared Namespace Without Access Control in store_user_embedding",
+      "severity": "high",
+      "location": "store_user_embedding, line 124",
+      "description": "User content is embedded without validation and stored in a shared vector DB without namespace isolation, enabling poisoning and leakage between users.",
+      "recommendation": "Validate embeddings input and segment vector database by namespaces per user or tenant.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Unbounded Input Length for Embeddings Leading to Potential DoS in get_embedding",
+      "severity": "medium",
+      "location": "get_embedding, line 133",
+      "description": "Embedding API is called with user input without max length or rate limiting, allowing potential denial of service with large inputs or high request rates.",
+      "recommendation": "Enforce input length limits and rate limit requests to embedding endpoints.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Lack of Access Control on RAG Query Leading to Data Disclosure in rag_query_no_access_control",
+      "severity": "high",
+      "location": "rag_query_no_access_control, line 141",
+      "description": "No per-user access control applied to retrieved documents from vector DB, allowing users to access other users' data.",
+      "recommendation": "Implement document-level access control to enforce data isolation between users.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Role Misrepresentation in Medical Advice Generation Without Disclaimer in generate_medical_advice",
+      "severity": "high",
+      "location": "generate_medical_advice, line 154",
+      "description": "LLM is assigned the role of 'medical doctor' without disclaimers that it is an AI assistant, risking user misinformation and harm.",
+      "recommendation": "Include clear disclaimers that model output is not professional medical advice and require review by qualified professionals.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Role Misrepresentation in Legal Contract Generation With No Attorney Review in generate_legal_contract",
+      "severity": "high",
+      "location": "generate_legal_contract, line 166",
+      "description": "LLM output is presented as legally binding contract text without any attorney oversight, enabling misinformation and liability.",
+      "recommendation": "Clearly label generated text as draft only and require legal professional review.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Lack of max_tokens Parameter Leading to Unbounded Token Usage in process_all_documents",
+      "severity": "medium",
+      "location": "process_all_documents, line 177",
+      "description": "LLM API calls do not set max_tokens limit, resulting in potential API cost and token exhaustion when processing large document lists.",
+      "recommendation": "Enforce max_tokens limits per API call and batch or limit number of documents processed per request.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Unbounded Loop and Unrestricted Conversation History Growth in unlimited_context_chain",
+      "severity": "medium",
+      "location": "unlimited_context_chain, line 190",
+      "description": "Conversation history grows indefinitely with no truncation, causing token limit exhaustion or escalating cost.",
+      "recommendation": "Implement conversation window size limits or truncation to control token usage.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    },
+    {
+      "title": "Unrestricted Public API Endpoint Without Rate Limiting or max_tokens in api_endpoint_no_rate_limit",
+      "severity": "medium",
+      "location": "api_endpoint_no_rate_limit, line 203",
+      "description": "API endpoint lacks authentication, rate limiting, and max_tokens setting, enabling API abuse and unbounded token consumption.",
+      "recommendation": "Add authentication, rate limits, and enforce max_tokens on LLM API calls.",
+      "source_file": "C:\\Users\\conve\\AppData\\Local\\Temp\\tmp5c5xj8v2\\owasp_llm04_to_llm10.py"
+    }
+  ],
+  "lc_summary": ""
+}

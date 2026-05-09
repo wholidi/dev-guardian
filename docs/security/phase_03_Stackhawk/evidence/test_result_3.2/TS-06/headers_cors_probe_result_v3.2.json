@@ -1,0 +1,9 @@
+{
+  "summary": "Security scan completed. 1 finding identified (0 critical, 0 high). See the findings table below for full details.",
+  "findings": [
+    {
+      "source_file": "/tmp/tmpeuwygl2d/headers_cors_probe.py"
+    }
+  ],
+  "lc_summary": ""
+}
